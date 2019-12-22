@@ -1,6 +1,7 @@
 #ifndef MISSION_H
-#define	MISSION_H
+#define    MISSION_H
 
+#include <memory>
 #include "map.h"
 #include "config.h"
 #include "search.h"
@@ -16,31 +17,40 @@
 //Hint: Create Mission object in the main() function and then use it 1) to retreive all the data from input XML
 //2) run the search 3) flush the results to output XML
 
-class Mission
-{
-    public:
-        Mission();
-        Mission (const char* fileName);
-        ~Mission();
+class Mission {
+public:
+    Mission();
 
-        bool getMap();
-        bool getConfig();
-        bool createLog();
-        void createSearch();
-        void createEnvironmentOptions();
-        void startSearch();
-        void printSearchResultsToConsole();
-        void saveSearchResultsToLog();
-        SearchResult getSearchResult();
-        
-    private:
-        Map                     map;
-        Config                  config;
-        EnvironmentOptions      options;
-        Search                  search;
-        ILogger*                logger;
-        const char*             fileName;
-        SearchResult            sr;
+    explicit Mission(const char *fileName);
+
+    ~Mission();
+
+    bool getMap();
+
+    bool getConfig();
+
+    bool createLog();
+
+    void createSearch();
+
+    void createEnvironmentOptions();
+
+    void startSearch();
+
+    void printSearchResultsToConsole();
+
+    void saveSearchResultsToLog();
+
+    SearchResult getSearchResult();
+
+private:
+    Map map;
+    Config config;
+    EnvironmentOptions options;
+    std::unique_ptr<Search> search;
+    ILogger *logger;
+    const char *fileName;
+    SearchResult sr;
 };
 
 #endif

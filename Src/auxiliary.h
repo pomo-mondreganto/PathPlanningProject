@@ -5,6 +5,8 @@
 #ifndef PATHPLANNING_AUXILIARY_H
 #define PATHPLANNING_AUXILIARY_H
 
+#include <functional>
+
 template<typename T>
 void
 hash_combine(std::size_t &seed, T const &key) {
@@ -23,13 +25,6 @@ namespace std {
         }
     };
 }
-
-typedef std::unordered_map<std::pair<int, int>, std::shared_ptr<Node>> NMap;
-
-typedef std::set<
-        std::shared_ptr<Node>,
-        std::function<bool(const std::shared_ptr<Node> &,
-                           const std::shared_ptr<Node> &)>> BTSet;
 
 template<class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
@@ -64,6 +59,13 @@ struct f_node_compare {
         return n1->v_key() < n2->v_key();
     }
 };
+
+typedef std::unordered_map<std::pair<int, int>, std::shared_ptr<Node>> NMap;
+
+typedef std::set<
+        std::shared_ptr<Node>,
+        std::function<bool(const std::shared_ptr<Node> &,
+                           const std::shared_ptr<Node> &)>> BTSet;
 
 
 #endif //PATHPLANNING_AUXILIARY_H

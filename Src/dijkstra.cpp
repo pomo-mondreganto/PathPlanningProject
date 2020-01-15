@@ -2,6 +2,7 @@
 // Created by Roman Nikitin on 22.12.2019.
 //
 
+#include <chrono>
 #include "dijkstra.h"
 
 Dijkstra::Dijkstra() {
@@ -10,6 +11,8 @@ Dijkstra::Dijkstra() {
 
 SearchResult
 Dijkstra::startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     std::shared_ptr<Node> start = map.get_start_node();
 
     ++sresult.nodescreated;
@@ -73,6 +76,9 @@ Dijkstra::startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions 
     sresult.lppath = &lppath;
     sresult.hppath = &lppath;
 
+    auto end_time = std::chrono::high_resolution_clock::now();
+    sresult.time = (double) std::chrono::duration_cast<std::chrono::milliseconds>(
+            end_time - start_time).count();
     return sresult;
 }
 

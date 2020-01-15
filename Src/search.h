@@ -37,8 +37,11 @@ protected:
     std::list<std::shared_ptr<Node>> generateAdjacent(int i, int j, const Map &map,
                                                       const EnvironmentOptions &options);
 
-    double getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
-                       const EnvironmentOptions &options);
+    static double
+    getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
+                const EnvironmentOptions &options);
+
+    void buildHPPath();
 
     SearchResult sresult; //This will store the search result
     std::list<Node> lppath, hppath; //

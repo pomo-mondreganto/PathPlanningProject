@@ -1,5 +1,6 @@
 #include "mission.h"
 #include "dijkstra.h"
+#include "astar.h"
 
 Mission::Mission() {
     logger = nullptr;
@@ -34,10 +35,22 @@ void Mission::createEnvironmentOptions() {
     options.allowsqueeze = config.SearchParams[CN_SP_AS];
     options.allowdiagonal = config.SearchParams[CN_SP_AD];
     options.metrictype = config.SearchParams[CN_SP_MT];
+    if (CN_SP_HW < config.N) {
+        options.heuristicheight = config.SearchParams[CN_SP_HW];
+    }
+    if (CN_SP_BT < config.N) {
+        options.breakingties = config.SearchParams[CN_SP_BT];
+    }
 }
 
 void Mission::createSearch() {
-    search = std::make_unique<Dijkstra>();
+    if (config.SearchParams[CN_SP_ST] == CN_SP_ST_ASTAR) {
+        std::cout << "Using AStar search" << std::endl;
+        search = std::make_unique<AStar>();
+    } else {
+        std::cout << "Using Dijkstra search" << std::endl;
+        search = std::make_unique<Dijkstra>();
+    }
 }
 
 void Mission::startSearch() {

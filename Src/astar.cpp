@@ -1,21 +1,26 @@
 //
-// Created by Roman Nikitin on 22.12.2019.
+// Created by Roman Nikitin on 15.01.2020.
 //
 
-#include <chrono>
-#include "dijkstra.h"
+#include <set>
+#include "astar.h"
 
-Dijkstra::Dijkstra() {
+AStar::AStar() {
     sresult.nodescreated = 0;
 }
 
 SearchResult
-Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
+AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
+    f_node_compare comp{};
+    comp.breakingties = options.breakingties;
+
+    state = BTSet(comp);
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = map.get_start_node();
+    std::shared_ptr<Node> goal = map.get_goal_node();
 
-    ++sresult.nodescreated;
+    sresult.nodescreated += 2;
 
     state.insert(start);
     while (!state.empty()) {
@@ -27,15 +32,20 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
         std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j, map, options);
 
         for (auto &n: adj) {
-            double new_dist = cur->g + getDistance(cur, n, options);
+            double dist = getDistance(cur, n, options);
+            double heuristic = getDistance(n, goal, options);
+            double new_g = cur->g + dist;
+            double new_F = new_g + options.heuristicheight * heuristic;
 
             std::pair<int, int> key = n->v_key();
             bool not_in_state = (which.count(key) == 0);
-            if (not_in_state || which[key]->g > new_dist) {
+            if (not_in_state || which[key]->g > new_g) {
                 if (!not_in_state) {
                     state.erase(which[key]);
                 }
-                n->g = new_dist;
+                n->g = new_g;
+                n->H = heuristic;
+                n->F = new_F;
                 n->parent = cur;
                 which[key] = n;
 
@@ -53,7 +63,7 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
         return sresult;
     }
 
-    std::shared_ptr<Node> goal = which[key];
+    goal = which[key];
 
     sresult.pathfound = true;
     sresult.pathlength = static_cast<float>(which[key]->g);
@@ -74,4 +84,4 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
     return sresult;
 }
 
-Dijkstra::~Dijkstra() = default;
+AStar::~AStar() = default;

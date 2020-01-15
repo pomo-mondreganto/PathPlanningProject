@@ -1,6 +1,8 @@
 SET(CMAKE_CXX_STANDARD 14)
 
-set(HEADERS         config.h
+set(HEADERS
+        astar.h
+        config.h
         environmentoptions.h
         dijkstra.h
         gl_const.h
@@ -13,7 +15,9 @@ set(HEADERS         config.h
         tinyxml2.h
         xmllogger.h)
 
-set(SOURCES         config.cpp
+set(SOURCES
+        astar.cpp
+        config.cpp
         environmentoptions.cpp
         dijkstra.cpp
         map.cpp
@@ -22,7 +26,7 @@ set(SOURCES         config.cpp
         tinyxml2.cpp
         xmllogger.cpp)
 
-add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp)
+add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp astar.cpp astar.h auxiliary.h)
 
 add_library(PPLIB ${HEADERS} ${SOURCES})
 

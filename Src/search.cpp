@@ -67,13 +67,9 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
             ++cnt_blocked;
         }
 
-        if (cnt_blocked == 0) {
-            result.push_back(std::make_shared<Node>(ni, nj, 0));
-            ++sresult.nodescreated;
-        } else if (cnt_blocked == 1 && options.cutcorners) {
-            result.push_back(std::make_shared<Node>(ni, nj, 0));
-            ++sresult.nodescreated;
-        } else if (cnt_blocked == 2 && options.allowsqueeze) {
+        if (cnt_blocked == 0 ||
+            (cnt_blocked == 1 && options.cutcorners) ||
+            (cnt_blocked == 2 && options.allowsqueeze)) {
             result.push_back(std::make_shared<Node>(ni, nj, 0));
             ++sresult.nodescreated;
         }
@@ -99,6 +95,33 @@ Search::getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<No
         default:
             return -1;
     }
+}
+
+void Search::buildHPPath() {
+    for (auto it = lppath.begin(); it != lppath.end(); ++it) {
+        if (it == lppath.begin()) {
+            hppath.push_back(*it);
+            continue;
+        }
+        auto prev = it;
+        --prev;
+        if (prev == lppath.begin()) {
+            continue;
+        }
+
+        auto pprev = prev;
+        --pprev;
+
+        int di1 = it->i - prev->i;
+        int dj1 = it->j - prev->j;
+        int di2 = prev->i - pprev->i;
+        int dj2 = prev->j - pprev->j;
+
+        if (di1 != di2 || dj1 != dj2) {
+            hppath.push_back(*prev);
+        }
+    }
+    hppath.push_back(lppath.back());
 }
 
 /*void Search::makePrimaryPath(Node curNode)

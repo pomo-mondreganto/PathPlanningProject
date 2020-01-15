@@ -1,36 +1,37 @@
 //
-// Created by Roman Nikitin on 22.12.2019.
+// Created by Roman Nikitin on 15.01.2020.
 //
 
-#ifndef PATHPLANNING_DIJKSTRA_H
-#define PATHPLANNING_DIJKSTRA_H
+#ifndef PATHPLANNING_ASTAR_H
+#define PATHPLANNING_ASTAR_H
 
 #include <type_traits>
 #include <limits>
 #include <cmath>
 #include <algorithm>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <tuple>
 #include <memory>
+#include <functional>
 #include "node.h"
 #include "searchresult.h"
 #include "search.h"
 #include "xmllogger.h"
 #include "map.h"
 #include "environmentoptions.h"
+#include "dijkstra.h"
 #include "auxiliary.h"
 
-
-class Dijkstra : public Search {
+class AStar : public Search {
 protected:
-    std::set<std::shared_ptr<Node>, g_node_compare> state;
+    BTSet state;
     NMap which;
 
 public:
-    Dijkstra();
+    AStar();
 
-    ~Dijkstra() override;
+    ~AStar() override;
 
     SearchResult
     startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options) override;
@@ -38,4 +39,4 @@ public:
 };
 
 
-#endif //PATHPLANNING_DIJKSTRA_H
+#endif //PATHPLANNING_ASTAR_H

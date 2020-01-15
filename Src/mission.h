@@ -10,6 +10,8 @@
 #include "environmentoptions.h"
 #include "search.h"
 #include "xmllogger.h"
+#include "dijkstra.h"
+#include "astar.h"
 
 //That's the wrap up class that first creates all the needed objects (Map, Search etc.)
 //and then runs the search and then cleans everything up.

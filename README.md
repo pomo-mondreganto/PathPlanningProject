@@ -1,78 +1,31 @@
 # PathPlanningProject
-Шаблон исходного кода для выполнения проекта по планированию траекторий.
+Проект НИУ ВШЭ по планированию траекторий
 
 ![comics](./Images/comics.png)
 
 ## Требования
-Для работы над проектом требуется иметь аккаут GitHub.
 
 Для сборки и запуска возможно использовать QMake или CMake. CMakeLists.txt и .pro файлы доступны в репозитории. Для проведения тестирования локально испольщуйте CMake. Подробные требования к ПО указаны ниже. 
 
 ### Linux
 - Git 2.7.4 или выше
 - CMake 3.2 или выше;
-- GCC 4.9 или выше;
+- GCC 7.1 или выше;
 - Make
-- QtCreator и Qt5 (по желанию).
 
 ### Mac
 - Git 2.23.0 или выше
-- CMake 3.2 или выше;
-- Apple LLVM version 10.0.0 (clang-1000.11.45.5) или выше;
+- CMake 3.16.1 или выше;
+- Apple LLVM version 11.0.0 (clang-1100.0.33.16) или выше;
 - Make
-- QtCreator и Qt5 (по желанию).
 
 ### Windows
 - Git 2.23.0 или выше
 - CMake 3.2 или выше;
 - MinGW-w64 5.0.3 или выше (должен быть добавлен в переменную среды Path);
-- QtCreator и Qt5 (по желанию).
 
-## Начало работы
-Cоздайте ответвление (fork) этого репозитория в свой GitHub аккаунт. Загрузите содержимое полученного репозитория, либо клонируйте его в нужную вам директорию.
-```bash
-git clone https://github.com/*account*/PathPlanningProject.git
-```
-
-### Сборка и запуск
-
-Сборку проекта возможно осуществить двумя способами:
-- Используя QtCreator и qmake;
-- Используя CMake.
+Сборку проекта возможно осуществить используя CMake.
   
-При использовании QtCreator требуется открыть файл `ASearch.pro` который находится в директории `.../PathPlanningProject/Src/` и настроить проект с нужным комплектом сборки.
-
-![qt_open](./Images/qt1.png)
-
-После выбора проекта требуется установить имя входного файла как аргумент командной строки. В качестве первого примера используйте файл `.../PathPlanningProject/Examples/example.xml`. Для установки аргументов командной строки перейдите в настройки запуска проекта и введите нужный путь к файлу в поле "Параметры командной строки".
-
-![qt_arg](./Images/qt2.png)
-
-После установки аргумента командной строки можно проверить работу программы. Следующий результат должен отобразиться в результате запуска:
-
-```
-Parsing the map from XML:
-Map OK!
-Parsing configurations (algorithm, log) from XML:
-short
-Warning! Value of 'logpath' tag is missing!
-Value of 'logpath' tag was defined to 'current directory'.
-Warning! Value of 'logfilename' tag is missing.
-Value of 'logfilename' tag was defined to default (original filename +'_log' + original file extension.
-Configurations OK!
-Creating log channel:
-Log OK!
-Start searching the path:
-Search is finished!
-Path NOT found!
-numberofsteps=0
-nodescreated=0
-time=0
-Results are saved (if chosen) via created log channel.
-```
-
-При использовании CMake сборка и запуск может производиться как из командной строки, так и при помощи различных IDE (например JetBrains CLion). Ниже приведены скрипты сборки и запуска с использованием командной строки.
-
 ### Linux и Mac
 Release сборка:
 ```bash
@@ -200,12 +153,9 @@ The following tests FAILED:
 	 12 - Test12 (Failed)
 Errors while running CTest
 ```
-Для корректного тестирования поддерживайте файлы CMakeLists.txt в актуальном состоянии даже при использовании QtCreator.
-
-Для удаленного тестирования и получения "плашки" о проведении тестирования следует подключить сервисы TravisCI и AppVeyor к вашему репозиторию. Файлы `.travis.yml` и `.appveyor.yml` доступны в репозитории. После активации сервисов тестирование будет проводиться после каждого коммита в репозиторий GitHub. Подробная информация о тестировании будет доступна в личном кабинете соответствующего сервиса. [Подробнее об удаленном тестировании](https://habr.com/ru/post/329264/).
 
 ## Контакты
-**Яковлев Константин Сергеевич**
+**Яковлев Константин Сергеевич** (ментор)
 - kyakovlev@hse.ru
 - [Сайт НИУ ВШЭ](https://www.hse.ru/staff/yakovlev-ks)
 - Telegram: @KonstantinYakovlev

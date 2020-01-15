@@ -43,7 +43,7 @@ protected:
 
     void buildHPPath();
 
-    SearchResult sresult; //This will store the search result
+    SearchResult sresult;
     std::list<Node> lppath, hppath; //
 
     //CODE HERE to define other members of the class

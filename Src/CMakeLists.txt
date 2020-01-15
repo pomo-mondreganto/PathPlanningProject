@@ -3,9 +3,10 @@ set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
 set(HEADERS
         astar.h
+        auxiliary.h
         config.h
-        environmentoptions.h
         dijkstra.h
+        environmentoptions.h
         gl_const.h
         ilogger.h
         map.h
@@ -19,15 +20,15 @@ set(HEADERS
 set(SOURCES
         astar.cpp
         config.cpp
-        environmentoptions.cpp
         dijkstra.cpp
+        environmentoptions.cpp
         map.cpp
         mission.cpp
         search.cpp
         tinyxml2.cpp
         xmllogger.cpp)
 
-add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp astar.cpp astar.h auxiliary.h)
+add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp)
 
 add_library(PPLIB ${HEADERS} ${SOURCES})
 

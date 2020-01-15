@@ -5,14 +5,6 @@
 #ifndef PATHPLANNING_DIJKSTRA_H
 #define PATHPLANNING_DIJKSTRA_H
 
-#include <type_traits>
-#include <limits>
-#include <cmath>
-#include <algorithm>
-#include <set>
-#include <map>
-#include <tuple>
-#include <memory>
 #include "node.h"
 #include "searchresult.h"
 #include "search.h"
@@ -20,6 +12,8 @@
 #include "map.h"
 #include "environmentoptions.h"
 #include "auxiliary.h"
+#include <set>
+#include <memory>
 
 
 class Dijkstra : public Search {

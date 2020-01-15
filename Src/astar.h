@@ -11,14 +11,12 @@
 #include "xmllogger.h"
 #include "map.h"
 #include "environmentoptions.h"
-#include "dijkstra.h"
 #include "auxiliary.h"
 
 class AStar : public Search {
 protected:
     BTSet OPEN;
     FPSet CLOSED;
-    NMap which;
 
 public:
     AStar();
@@ -27,7 +25,6 @@ public:
 
     SearchResult
     startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options) override;
-
 };
 
 

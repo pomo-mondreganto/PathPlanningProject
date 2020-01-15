@@ -2,8 +2,8 @@
 // Created by Roman Nikitin on 15.01.2020.
 //
 
-#include <set>
 #include "astar.h"
+#include <chrono>
 
 AStar::AStar() {
     sresult.nodescreated = 0;
@@ -11,8 +11,7 @@ AStar::AStar() {
 
 SearchResult
 AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
-    f_node_compare comp{};
-    comp.breakingties = options.breakingties;
+    f_node_compare comp{options.breakingties};
 
     OPEN = BTSet(comp);
     auto start_time = std::chrono::high_resolution_clock::now();

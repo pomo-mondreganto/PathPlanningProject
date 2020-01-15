@@ -5,10 +5,14 @@
 #ifndef PATHPLANNING_AUXILIARY_H
 #define PATHPLANNING_AUXILIARY_H
 
+#include "gl_const.h"
 #include <set>
+#include <limits>
+#include <memory>
+#include <functional>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
-#include <functional>
 
 template<typename T>
 void

@@ -2,14 +2,16 @@ TARGET = pathplanning
 CONFIG   += console
 CONFIG   -= app_bundle
 TEMPLATE = app
-QMAKE_CXXFLAGS += -std=c++11 -O2 -Wall -Wextra
+QMAKE_CXXFLAGS += -std=c++14 -O3 -Wall -Wextra
 
 win32 {
 QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 }
 
 SOURCES += \
+    astar.cpp \
     config.cpp \
+    dijkstra.cpp \
     environmentoptions.cpp \
     main.cpp \
     map.cpp \
@@ -19,7 +21,10 @@ SOURCES += \
     xmllogger.cpp 
      
 HEADERS += \
+    astar.h \
+    auxiliary.h \
     config.h \
+    dijkstra.h \
     environmentoptions.h \
     gl_const.h \
     ilogger.h \

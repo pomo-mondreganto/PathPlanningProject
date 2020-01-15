@@ -14,7 +14,7 @@ AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options)
     f_node_compare comp{};
     comp.breakingties = options.breakingties;
 
-    state = BTSet(comp);
+    OPEN = BTSet(comp);
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = map.get_start_node();
@@ -22,51 +22,43 @@ AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options)
 
     sresult.nodescreated += 2;
 
-    state.insert(start);
-    while (!state.empty()) {
+    OPEN.insert(start);
+    while (!OPEN.empty() && CLOSED.count(goal) == 0) {
         ++sresult.numberofsteps;
 
-        std::shared_ptr<Node> cur = *state.begin();
-        state.erase(state.begin());
+        std::shared_ptr<Node> cur = *OPEN.begin();
+        OPEN.erase(OPEN.begin());
+        CLOSED.insert(cur);
 
         std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j, map, options);
 
         for (auto &n: adj) {
+            if (CLOSED.count(n)) {
+                continue;
+            }
             double dist = getDistance(cur, n, options);
             double heuristic = getDistance(n, goal, options);
-            double new_g = cur->g + dist;
-            double new_F = new_g + options.heuristicheight * heuristic;
 
-            std::pair<int, int> key = n->v_key();
-            bool not_in_state = (which.count(key) == 0);
-            if (not_in_state || which[key]->g > new_g) {
-                if (!not_in_state) {
-                    state.erase(which[key]);
-                }
-                n->g = new_g;
-                n->H = heuristic;
-                n->F = new_F;
-                n->parent = cur;
-                which[key] = n;
+            n->g = cur->g + dist;
+            n->H = heuristic;
+            n->F = n->g + options.heuristicheight * heuristic;
+            n->parent = cur;
 
-                state.insert(n);
-            }
+            OPEN.insert(n);
         }
-        std::cout << std::endl;
     }
 
-    std::pair<int, int> key = map.get_goal_node()->v_key();
-
-    if (!which.count(key)) {
+    if (CLOSED.count(goal) == 0) {
         sresult.pathfound = false;
         sresult.pathlength = 0;
         return sresult;
     }
 
-    goal = which[key];
-
+    std::shared_ptr<Node> real_goal = *CLOSED.find(goal);
     sresult.pathfound = true;
-    sresult.pathlength = static_cast<float>(which[key]->g);
+    sresult.pathlength = static_cast<float>(real_goal->g);
+    goal = real_goal;
+
     while (goal->v_key() != start->v_key()) {
         lppath.push_front(*goal);
         goal = goal->parent;

@@ -5,6 +5,9 @@
 #ifndef PATHPLANNING_AUXILIARY_H
 #define PATHPLANNING_AUXILIARY_H
 
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <functional>
 
 template<typename T>
@@ -24,7 +27,23 @@ namespace std {
             return seed;
         }
     };
+
 }
+
+struct node_ptr_hasher {
+    std::size_t operator()(std::shared_ptr<Node> const &p) const {
+        std::size_t seed(0);
+        ::hash_combine(seed, p->i);
+        ::hash_combine(seed, p->j);
+        return seed;
+    }
+};
+
+struct node_ptr_equal_to {
+    bool operator()(const std::shared_ptr<Node> &n1, const std::shared_ptr<Node> &n2) const {
+        return n1->i == n2->i && n1->j == n2->j;
+    }
+};
 
 template<class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
@@ -67,5 +86,6 @@ typedef std::set<
         std::function<bool(const std::shared_ptr<Node> &,
                            const std::shared_ptr<Node> &)>> BTSet;
 
+typedef std::unordered_set<std::shared_ptr<Node>, node_ptr_hasher, node_ptr_equal_to> FPSet;
 
 #endif //PATHPLANNING_AUXILIARY_H

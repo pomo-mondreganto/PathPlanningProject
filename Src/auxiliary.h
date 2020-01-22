@@ -5,13 +5,13 @@
 #ifndef PATHPLANNING_AUXILIARY_H
 #define PATHPLANNING_AUXILIARY_H
 
+#include "node.h"
 #include "gl_const.h"
 #include <set>
 #include <limits>
 #include <memory>
 #include <functional>
 #include <type_traits>
-#include <unordered_map>
 #include <unordered_set>
 
 template<typename T>
@@ -82,8 +82,6 @@ struct f_node_compare {
         return n1->v_key() < n2->v_key();
     }
 };
-
-typedef std::unordered_map<std::pair<int, int>, std::shared_ptr<Node>> NMap;
 
 typedef std::set<
         std::shared_ptr<Node>,

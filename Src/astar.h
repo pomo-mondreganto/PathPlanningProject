@@ -11,13 +11,8 @@
 #include "xmllogger.h"
 #include "map.h"
 #include "environmentoptions.h"
-#include "auxiliary.h"
 
 class AStar : public Search {
-protected:
-    BTSet OPEN;
-    FPSet CLOSED;
-
 public:
     AStar();
 

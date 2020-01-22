@@ -64,14 +64,15 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
     }
     lppath.push_front(*goal);
 
+    auto end_time = std::chrono::high_resolution_clock::now();
+    sresult.time = (double) std::chrono::duration_cast<std::chrono::seconds>(
+            end_time - start_time).count();
+
     buildHPPath();
 
     sresult.lppath = &lppath;
     sresult.hppath = &hppath;
 
-    auto end_time = std::chrono::high_resolution_clock::now();
-    sresult.time = (double) std::chrono::duration_cast<std::chrono::seconds>(
-            end_time - start_time).count();
     return sresult;
 }
 

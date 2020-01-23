@@ -27,6 +27,9 @@ AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options)
 
         std::shared_ptr<Node> cur = *OPEN.begin();
         OPEN.erase(OPEN.begin());
+        if (CLOSED.count(cur)) {
+            continue;
+        }
         CLOSED.insert(cur);
 
         std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j, map, options);

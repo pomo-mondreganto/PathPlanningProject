@@ -51,6 +51,11 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
     if (CLOSED.count(goal) == 0) {
         sresult.pathfound = false;
         sresult.pathlength = 0;
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        sresult.time = (double) std::chrono::duration_cast<std::chrono::seconds>(
+                end_time - start_time).count();
+
         return sresult;
     }
 

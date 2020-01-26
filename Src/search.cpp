@@ -124,6 +124,15 @@ void Search::buildHPPath() {
     hppath.push_back(lppath.back());
 }
 
+double Search::getTime(const TP &start, const TP &end) {
+    double duration = static_cast<double>(
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                    end - start).count()
+    );
+    duration /= 1000000.0;
+    return duration;
+}
+
 /*void Search::makePrimaryPath(Node curNode)
 {
     //need to implement

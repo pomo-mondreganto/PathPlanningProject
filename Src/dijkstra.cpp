@@ -15,7 +15,7 @@ Dijkstra::Dijkstra() {
 SearchResult
 Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
     OPEN = BTSet(g_node_compare{});
-    auto start_time = std::chrono::high_resolution_clock::now();
+    TP start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = map.get_start_node();
     std::shared_ptr<Node> goal = map.get_goal_node();
@@ -52,9 +52,8 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
         sresult.pathfound = false;
         sresult.pathlength = 0;
 
-        auto end_time = std::chrono::high_resolution_clock::now();
-        sresult.time = (double) std::chrono::duration_cast<std::chrono::seconds>(
-                end_time - start_time).count();
+        TP end_time = std::chrono::high_resolution_clock::now();
+        sresult.time = getTime(start_time, end_time);
 
         return sresult;
     }
@@ -71,8 +70,7 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
     lppath.push_front(*goal);
 
     auto end_time = std::chrono::high_resolution_clock::now();
-    sresult.time = (double) std::chrono::duration_cast<std::chrono::seconds>(
-            end_time - start_time).count();
+    sresult.time = getTime(start_time, end_time);
 
     buildHPPath();
 

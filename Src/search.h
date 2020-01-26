@@ -27,6 +27,9 @@ protected:
     getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
                 const EnvironmentOptions &options);
 
+    static double
+    getTime(const TP &start, const TP &end);
+
     void buildHPPath();
 
     SearchResult sresult;

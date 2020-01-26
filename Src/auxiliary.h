@@ -13,6 +13,7 @@
 #include <functional>
 #include <type_traits>
 #include <unordered_set>
+#include <chrono>
 
 template<typename T>
 void
@@ -89,5 +90,7 @@ typedef std::set<
                            const std::shared_ptr<Node> &)>> BTSet;
 
 typedef std::unordered_set<std::shared_ptr<Node>, node_ptr_hasher, node_ptr_equal_to> FPSet;
+
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> TP;
 
 #endif //PATHPLANNING_AUXILIARY_H

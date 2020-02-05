@@ -35,7 +35,6 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
         int nj = j + dj[d];
         if (map.CellOnGrid(ni, nj) && map.CellIsTraversable(ni, nj)) {
             result.push_back(std::make_shared<Node>(ni, nj, 0));
-            ++sresult.nodescreated;
         }
     }
 
@@ -71,7 +70,6 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
             (cnt_blocked == 1 && options.cutcorners) ||
             (cnt_blocked == 2 && options.allowsqueeze)) {
             result.push_back(std::make_shared<Node>(ni, nj, 0));
-            ++sresult.nodescreated;
         }
     }
 

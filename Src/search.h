@@ -20,8 +20,8 @@ public:
     startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options) = 0;
 
 protected:
-    std::list<std::shared_ptr<Node>> generateAdjacent(int i, int j, const Map &map,
-                                                      const EnvironmentOptions &options);
+    static std::list<std::shared_ptr<Node>> generateAdjacent(int i, int j, const Map &map,
+                                                             const EnvironmentOptions &options);
 
     static double
     getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,

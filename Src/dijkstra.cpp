@@ -20,8 +20,6 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
     std::shared_ptr<Node> start = map.get_start_node();
     std::shared_ptr<Node> goal = map.get_goal_node();
 
-    sresult.nodescreated += 2;
-
     OPEN.insert(start);
     while (!OPEN.empty() && CLOSED.count(goal) == 0) {
         std::shared_ptr<Node> cur = *OPEN.begin();
@@ -46,6 +44,8 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
             OPEN.insert(n);
         }
     }
+
+    sresult.nodescreated = OPEN.size() + CLOSED.size();
 
     if (CLOSED.count(goal) == 0) {
         sresult.pathfound = false;

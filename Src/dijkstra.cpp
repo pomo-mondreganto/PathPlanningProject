@@ -4,6 +4,7 @@
 
 #include "auxiliary.h"
 #include "dijkstra.h"
+#include "gl_const.h"
 #include "search.h"
 #include <list>
 #include <chrono>
@@ -36,7 +37,7 @@ Dijkstra::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions 
             if (CLOSED.count(n)) {
                 continue;
             }
-            double dist = getDistance(cur, n, options);
+            double dist = getDistance(cur, n, CN_SP_MT_EUCL);
 
             n->g = cur->g + dist;
             n->parent = cur;

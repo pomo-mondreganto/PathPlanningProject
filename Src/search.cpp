@@ -64,10 +64,10 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
 
 double
 Search::getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
-                    const EnvironmentOptions &options) {
+                    int metrictype) {
     int di = std::abs(first->i - second->i);
     int dj = std::abs(first->j - second->j);
-    switch (options.metrictype) {
+    switch (metrictype) {
         case CN_SP_MT_MANH:
             return std::abs(di) + std::abs(dj);
         case CN_SP_MT_EUCL:

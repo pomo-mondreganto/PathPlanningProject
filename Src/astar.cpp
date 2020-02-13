@@ -3,6 +3,7 @@
 //
 
 #include "astar.h"
+#include "gl_const.h"
 #include <chrono>
 
 AStar::AStar() {
@@ -35,8 +36,8 @@ AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &op
             if (CLOSED.count(n)) {
                 continue;
             }
-            double dist = getDistance(cur, n, options);
-            double heuristic = getDistance(n, goal, options);
+            double dist = getDistance(cur, n, CN_SP_MT_EUCL);
+            double heuristic = getDistance(n, goal, options.metrictype);
 
             n->g = cur->g + dist;
             n->H = heuristic;

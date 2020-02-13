@@ -25,7 +25,7 @@ protected:
 
     static double
     getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
-                const EnvironmentOptions &options);
+                int metrictype);
 
     static double
     getTime(const TP &start, const TP &end);

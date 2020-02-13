@@ -1,7 +1,12 @@
 # PathPlanningProject
 Проект НИУ ВШЭ по планированию траекторий
 
+[![Build Status](https://travis-ci.org/pomo-mondreganto/PathPlanningProject.svg?branch=master)](https://travis-ci.com/pomo-mondreganto/PathPlanningProject)
+[![Build status](https://ci.appveyor.com/api/projects/status/y8a97wycufcy1aeg?svg=true)](https://ci.appveyor.com/project/pomo-mondreganto/pathplanningproject)
+
 ![comics](./Images/comics.png)
+
+
 
 ## Требования
 
@@ -88,14 +93,71 @@ PathPlanning.exe ../../Examples/example.xml
 Результат запуска:
 ![cmake_run2](./Images/cmake.png)
 
+## Опции 
+
+Входные данные подаются программе первым аргументом командной строки, в котором должен быть указан 
+путь к XML-файлу. Поддерживаемые опции:
+
+- `root`: корневой элемент, содержит все остальные опции
+  - `map`: описание входного графа-карты
+    - `width`: ширина карты
+    - `height`: высота карты
+    - `cellsize`: "расстояние" между соседними клетками карты
+    - `startx`: x-кооордината стартовой точки
+    - `starty`: y-кооордината стартовой точки
+    - `finishx`: x-кооордината конечной точки
+    - `finishy`: y-кооордината конечной точки
+    - `grid`: сам граф-карта
+      - `row`: строка карты, должен быть указан `height` раз, в каждой строке `width` разделенных 
+       пробелами чисел 0/1, заблокирована клетка или нет
+  - `algorithm`: описание алгоритма, который нужно запустить
+    - `searchtype`: тип поиска, поддерживаются `astar` или `dijkstra`
+    - `metrictype`: тип метрики (для эвристики `astar`, поддерживаются `diagonal`, `manhattan`, 
+    `euclidean` и `chebyshev`
+    - `breakingties`: опция `star`, определяющая порядок раскрытия вершин при равных `F`-значениях, 
+    поддерживаются `g-min` и `g-max` (выбирается вершина с наименьшим/наибольшим `g`-значением 
+    соответственно)
+    - `hweight`: вес эвристики для `astar`
+    - `allowdiagonal`: разрешены ли переходы по диагонали (`true`/`false`). Пример перехода 
+    (из точки 1 в точку 2, звездочками обозначены препятствия, здесь и далее) в конце описания опций
+    - `cutcorners`: разрешены ли переходы по диагонали при одной заблокированной смежной клетке 
+    (`true`/`false`).
+    - `allowsqueeze`: разрешены ли переходы по диагонали при двух заблокированных смежных клетках 
+        (`true`/`false`). 
+  - `options`: дополнительные опции
+    - `loglevel`: уровень логгирования, число от `0` до `2` с шагом `0.5`, больше число, больше 
+    информации
+    - `logpath`: путь к файлу с логом, по умолчанию текущая директория
+    - `logfilename`: название файла с логом, по умолчанию `<input>_log.xml`   
+
+#### Описание переходов:
+
+- `allowdiagonal`:
+
+```
+.2
+1.
+```
+
+- `cutcorners`:
+
+```
+.2
+1*
+```
+
+- `allowsqueeze`:
+
+```
+*2
+1*
+```
+
+
+
+
+
 ## Тестирование 
-Linux test result:
-
-[![Build Status](https://travis-ci.org/pomo-mondreganto/PathPlanningProject.svg?branch=master)](https://travis-ci.com/pomo-mondreganto/PathPlanningProject)
-
-Windows test result:
-
-[![Build status](https://ci.appveyor.com/api/projects/status/y8a97wycufcy1aeg?svg=true)](https://ci.appveyor.com/project/pomo-mondreganto/pathplanningproject)
 
 При использовании сборки CMake возможен запуск тестов, как локально, так и с использованием Travis CI и AppVeyor. 
 Локальный запуск тестов производится из директории `.../PathPlanningProject/Build/{Debug|Release}/` с помощью команды:

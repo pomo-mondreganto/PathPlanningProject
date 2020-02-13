@@ -1,34 +1,37 @@
 #ifndef XMLLOGGER_H
-#define	XMLLOGGER_H
+#define    XMLLOGGER_H
+
+#include <utility>
+
+#include "auxiliary.h"
 #include "tinyxml2.h"
 #include "ilogger.h"
-
-
-//That's the class that flushes the data to the output XML
 
 
 class XmlLogger : public ILogger {
 
 public:
-    XmlLogger(std::string loglevel):ILogger(loglevel){}
+    explicit XmlLogger(std::string loglevel) : ILogger(std::move(loglevel)) {}
 
-    virtual ~XmlLogger() {};
+    ~XmlLogger() override = default;
 
-    bool getLog(const char *FileName, const std::string *LogParams);
+    bool getLog(const char *FileName, const std::string *LogParams) override;
 
-    void saveLog();
+    void saveLog() override;
 
-    void writeToLogMap(const Map &Map, const std::list<Node> &path);
+    void writeToLogMap(const Map &Map, const std::list<Node> &path) override;
 
-    //void writeToLogOpenClose(const typename &open, const typename &close);
+    void writeToLogOpenClose(const BTSet &open, const FPSet &close, int step, bool last) override;
 
-    void writeToLogPath(const std::list<Node> &path);
+    void writeToLogPath(const std::list<Node> &path) override;
 
-    void writeToLogHPpath(const std::list<Node> &hppath);
+    void writeToLogHPpath(const std::list<Node> &hppath) override;
 
-    void writeToLogNotFound();
+    void writeToLogNotFound() override;
 
-    void writeToLogSummary(unsigned int numberofsteps, unsigned int nodescreated, float length, double time, double cellSize);
+
+    void writeToLogSummary(unsigned int numberofsteps, unsigned int nodescreated, float length,
+                           double time, double cellSize) override;
 
 private:
     std::string LogFileName;

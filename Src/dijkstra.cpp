@@ -13,7 +13,7 @@ Dijkstra::Dijkstra() {
 }
 
 SearchResult
-Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
+Dijkstra::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &options) {
     OPEN = BTSet(g_node_compare{});
     TP start_time = std::chrono::high_resolution_clock::now();
 
@@ -43,7 +43,12 @@ Dijkstra::startSearch(ILogger *, const Map &map, const EnvironmentOptions &optio
 
             OPEN.insert(n);
         }
+        logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                    false);
     }
+
+    logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                true);
 
     sresult.nodescreated = OPEN.size() + CLOSED.size();
 

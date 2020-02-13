@@ -4,20 +4,6 @@ Search::Search() = default;
 
 Search::~Search() = default;
 
-
-//SearchResult Search::startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options)
-//{
-//    //need to implement
-//
-//    /*sresult.pathfound = ;
-//    sresult.nodescreated =  ;
-//    sresult.numberofsteps = ;
-//    sresult.time = ;
-//    sresult.hppath = &hppath; //Here is a constant pointer
-//    sresult.lppath = &lppath;*/
-//    return sresult;
-//}
-
 std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Map &map,
                                                           const EnvironmentOptions &options) {
     std::list<std::shared_ptr<Node>> result;
@@ -130,13 +116,3 @@ double Search::getTime(const TP &start, const TP &end) {
     duration /= 1000000.0;
     return duration;
 }
-
-/*void Search::makePrimaryPath(Node curNode)
-{
-    //need to implement
-}*/
-
-/*void Search::makeSecondaryPath()
-{
-    //need to implement
-}*/

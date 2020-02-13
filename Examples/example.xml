@@ -42,11 +42,11 @@
         <breakingties>g-max</breakingties>
         <hweight>1</hweight>
         <allowdiagonal>true</allowdiagonal>
-        <cutcorners>true</cutcorners>
-        <allowsqueeze>true</allowsqueeze>
+        <cutcorners>false</cutcorners>
+        <allowsqueeze>false</allowsqueeze>
     </algorithm>
     <options>
-        <loglevel>1</loglevel>
+        <loglevel>1.5</loglevel>
         <logpath />
         <logfilename />
     </options>

@@ -10,7 +10,7 @@ AStar::AStar() {
 }
 
 SearchResult
-AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options) {
+AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &options) {
     f_node_compare comp{options.breakingties};
 
     OPEN = BTSet(comp);
@@ -45,9 +45,15 @@ AStar::startSearch(ILogger *, const Map &map, const EnvironmentOptions &options)
 
             OPEN.insert(n);
         }
+
+        logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                    false);
     }
 
     sresult.nodescreated = OPEN.size() + CLOSED.size();
+
+    logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                true);
 
     if (CLOSED.count(goal) == 0) {
         sresult.pathfound = false;

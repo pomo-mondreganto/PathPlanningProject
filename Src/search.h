@@ -36,6 +36,7 @@ protected:
     std::list<Node> lppath, hppath;
 
     BTSet OPEN;
+    FPSet IN_OPEN;
     FPSet CLOSED;
 };
 

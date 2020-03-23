@@ -20,10 +20,14 @@ AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &op
     std::shared_ptr<Node> start = map.get_start_node();
     std::shared_ptr<Node> goal = map.get_goal_node();
 
+    IN_OPEN.insert(start);
     OPEN.insert(start);
     while (!OPEN.empty() && CLOSED.count(goal) == 0) {
         std::shared_ptr<Node> cur = *OPEN.begin();
+
         OPEN.erase(OPEN.begin());
+        IN_OPEN.erase(cur);
+
         if (CLOSED.count(cur)) {
             continue;
         }
@@ -44,7 +48,18 @@ AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &op
             n->F = n->g + options.heuristicheight * heuristic;
             n->parent = cur;
 
-            OPEN.insert(n);
+            auto it = IN_OPEN.find(n);
+            if (it != IN_OPEN.end()) {
+                if ((*it)->F > n->F) {
+                    IN_OPEN.erase(it);
+                    IN_OPEN.insert(n);
+                    OPEN.erase(*it);
+                    OPEN.insert(n);
+                }
+            } else {
+                IN_OPEN.insert(n);
+                OPEN.insert(n);
+            }
         }
 
         logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,

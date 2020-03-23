@@ -15,6 +15,12 @@ AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &op
     f_node_compare comp{options.breakingties};
 
     OPEN = BTSet(comp);
+
+    if (map.getMapHeight() * map.getMapWidth() > BIG_MAP_THRESHOLD) {
+        CLOSED.rehash(INITIAL_FPSET_SIZE);
+        IN_OPEN.rehash(INITIAL_FPSET_SIZE);
+    }
+
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = map.get_start_node();

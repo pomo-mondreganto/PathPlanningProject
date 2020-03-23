@@ -15,6 +15,9 @@
 #include <unordered_set>
 #include <chrono>
 
+#define BIG_MAP_THRESHOLD 100000
+#define INITIAL_FPSET_SIZE 10000019
+
 template<typename T>
 void
 hash_combine(std::size_t &seed, T const &key) {

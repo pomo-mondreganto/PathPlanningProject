@@ -1,7 +1,10 @@
 #include "search.h"
 
-Search::Search(const Map &map, const EnvironmentOptions &options) : _map(map), _options(options),
-                                                                    _goal(map.get_goal_node()) {}
+Search::Search(ILogger *logger, const Map &map, const EnvironmentOptions &options) : _map(map),
+                                                                                     _options(
+                                                                                             options),
+                                                                                     _logger(logger),
+                                                                                     _goal(map.get_goal_node()) {}
 
 Search::~Search() = default;
 
@@ -89,6 +92,7 @@ Search::createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int 
     to_add->g = prev->g + getDistance(prev, to_add, CN_SP_MT_EUCL);
     to_add->H = getDistance(to_add, _goal, _options.metrictype);
     to_add->F = to_add->g + _options.heuristicheight * to_add->H;
+    _logger->simpleWriteNodeInfo("LOOK", to_add);
 
     if (add && CLOSED.find(to_add) == CLOSED.end()) {
         auto it = IN_OPEN.find(to_add);
@@ -98,10 +102,12 @@ Search::createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int 
                 IN_OPEN.insert(to_add);
                 OPEN.erase(*it);
                 OPEN.insert(to_add);
+                _logger->simpleWriteNodeInfo("OPEN", to_add);
             }
         } else {
             IN_OPEN.insert(to_add);
             OPEN.insert(to_add);
+            _logger->simpleWriteNodeInfo("OPEN", to_add);
         }
     }
 

@@ -111,7 +111,7 @@ PathPlanning.exe ../../Examples/example.xml
       - `row`: строка карты, должен быть указан `height` раз, в каждой строке `width` разделенных 
        пробелами чисел 0/1, заблокирована клетка или нет
   - `algorithm`: описание алгоритма, который нужно запустить
-    - `searchtype`: тип поиска, поддерживаются `astar` или `dijkstra`
+    - `searchtype`: тип поиска, поддерживаются `astar`, `dijkstra` или `jp_search`
     - `metrictype`: тип метрики (для эвристики `astar`, поддерживаются `diagonal`, `manhattan`, 
     `euclidean` и `chebyshev`
     - `breakingties`: опция `star`, определяющая порядок раскрытия вершин при равных `F`-значениях, 
@@ -153,8 +153,32 @@ PathPlanning.exe ../../Examples/example.xml
 1*
 ```
 
+*Обратите внимание*, что в случае алгоритма JPS (`jp_search`), значения переходов не учитываются,
+при этом считается, что `allowdiagonal=true`, `cutcorners=true`, `allowsqueeze=false`.
 
+## Сравнение алгоритмов
 
+На картинках показано явное сравнение производительности алгоритмов:
+
+---
+Алгоритм Дейкстры. Синим выделена точка старта, розовым выделена точка финиша. Красным выделены все 
+рассмотренные вершины.
+
+![dijkstra](Images/dijkstra.png)
+ 
+---
+
+Алгоритм A*. Цвета аналогичны алгоритму Дейкстры.
+
+![astar](Images/astar.png)
+
+---
+
+Алгоритм A*. Красным выделены вершины, помещенные в список OPEN, зеленым выделены все рассмотренные 
+вершины. Из-за маленького числа "тяжелых" операций добавления в список OPEN алгоритм отрабатывает 
+быстрее.
+
+![jps](Images/jps.png)
 
 
 ## Тестирование 
@@ -168,52 +192,6 @@ PathPlanning.exe ../../Examples/example.xml
 либо (для более подробного вывода):
 ```
  ctest --output-on-failure
-```
-При попытке запуска тестов c использованием пустого шаблона должен получиться следующий результат:
-```
-      Start  1: Test1
- 1/12 Test  #1: Test1 ............................***Failed    0.07 sec
-      Start  2: Test2
- 2/12 Test  #2: Test2 ............................***Failed    0.07 sec
-      Start  3: Test3
- 3/12 Test  #3: Test3 ............................***Failed    0.06 sec
-      Start  4: Test4
- 4/12 Test  #4: Test4 ............................***Failed    0.07 sec
-      Start  5: Test5
- 5/12 Test  #5: Test5 ............................***Failed    0.07 sec
-      Start  6: Test6
- 6/12 Test  #6: Test6 ............................***Failed    0.06 sec
-      Start  7: Test7
- 7/12 Test  #7: Test7 ............................***Failed    0.06 sec
-      Start  8: Test8
- 8/12 Test  #8: Test8 ............................***Failed    0.06 sec
-      Start  9: Test9
- 9/12 Test  #9: Test9 ............................***Failed    0.06 sec
-      Start 10: Test10
-10/12 Test #10: Test10 ...........................***Failed    0.07 sec
-      Start 11: Test11
-11/12 Test #11: Test11 ...........................***Failed    0.06 sec
-      Start 12: Test12
-12/12 Test #12: Test12 ...........................***Failed    0.06 sec
-
-0% tests passed, 12 tests failed out of 12
-
-Total Test time (real) =   0.80 sec
-
-The following tests FAILED:
-	  1 - Test1 (Failed)
-	  2 - Test2 (Failed)
-	  3 - Test3 (Failed)
-	  4 - Test4 (Failed)
-	  5 - Test5 (Failed)
-	  6 - Test6 (Failed)
-	  7 - Test7 (Failed)
-	  8 - Test8 (Failed)
-	  9 - Test9 (Failed)
-	 10 - Test10 (Failed)
-	 11 - Test11 (Failed)
-	 12 - Test12 (Failed)
-Errors while running CTest
 ```
 
 ## Контакты

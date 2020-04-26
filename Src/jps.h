@@ -10,12 +10,12 @@
 
 class Jps : public Search {
 public:
-    Jps(const Map &map, const EnvironmentOptions &options);
+    Jps(ILogger *logger, const Map &map, const EnvironmentOptions &options);
 
     ~Jps() override;
 
     SearchResult
-    startSearch(ILogger *Logger) override;
+    startSearch() override;
 
 protected:
     std::list<std::shared_ptr<Node>>

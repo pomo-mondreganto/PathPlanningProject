@@ -33,6 +33,10 @@ public:
     void writeToLogSummary(unsigned int numberofsteps, unsigned int nodescreated, float length,
                            double time, double cellSize) override;
 
+    void simpleWriteNodeInfo(const char *type, std::shared_ptr<Node> n) override;
+
+    void simpleWriteNodeInfo(const char *type, int i, int j) override;
+
 private:
     std::string LogFileName;
     tinyxml2::XMLDocument doc;

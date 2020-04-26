@@ -8,7 +8,8 @@
 #include <list>
 #include <memory>
 
-Jps::Jps(const Map &map, const EnvironmentOptions &options) : Search(map, options) {
+Jps::Jps(ILogger *logger, const Map &map, const EnvironmentOptions &options) : Search(logger, map,
+                                                                                      options) {
     sresult.nodescreated = 0;
 }
 
@@ -25,6 +26,8 @@ Jps::horSearch(const std::shared_ptr<Node> &from, int dj) {
         if (_map.CellIsBlocked(i1, j1)) {
             break;
         }
+
+        _logger->simpleWriteNodeInfo("LOOK", i1, j1);
 
         if (i1 == _goal->i && j1 == _goal->j) {
             result.push_back(createNode(from, i1, j1, 0, 0));
@@ -62,6 +65,8 @@ Jps::vertSearch(const std::shared_ptr<Node> &from, int di) {
         if (_map.CellIsBlocked(i1, j1)) {
             break;
         }
+
+        _logger->simpleWriteNodeInfo("LOOK", i1, j1);
 
         if (i1 == goal->i && j1 == goal->j) {
             result.push_back(createNode(from, i1, j1, 0, 0));
@@ -102,6 +107,8 @@ Jps::diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj) {
         if (_map.CellIsBlocked(i1, j1)) {
             break;
         }
+
+        _logger->simpleWriteNodeInfo("LOOK", i1, j1);
 
         if (i1 == goal->i && j1 == goal->j) {
             result.push_back(createNode(from, i1, j1, 0, 0));
@@ -169,7 +176,7 @@ Jps::diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj) {
 }
 
 SearchResult
-Jps::startSearch(ILogger *logger) {
+Jps::startSearch() {
     _goal = _map.get_goal_node();
     f_node_compare comp{_options.breakingties};
 
@@ -183,6 +190,10 @@ Jps::startSearch(ILogger *logger) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = _map.get_start_node();
+
+    _logger->simpleWriteNodeInfo("START", start);
+    _logger->simpleWriteNodeInfo("TERM", _goal);
+
     for (int di = -1; di <= 1; ++di) {
         for (int dj = -1; dj <= 1; ++dj) {
             if (!di && !dj) {
@@ -217,14 +228,14 @@ Jps::startSearch(ILogger *logger) {
             it->parent = cur;
         }
 
-        logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
-                                    false);
+        _logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                     false);
     }
 
     sresult.nodescreated = OPEN.size() + CLOSED.size();
 
-    logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
-                                true);
+    _logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                 true);
 
     if (CLOSED.count(_goal) == 0) {
         sresult.pathfound = false;

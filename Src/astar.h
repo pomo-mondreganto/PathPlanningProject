@@ -14,12 +14,12 @@
 
 class AStar : public Search {
 public:
-    AStar(const Map &map, const EnvironmentOptions &options);
+    AStar(ILogger *logger, const Map &map, const EnvironmentOptions &options);
 
     ~AStar() override;
 
     SearchResult
-    startSearch(ILogger *Logger) override;
+    startSearch() override;
 };
 
 

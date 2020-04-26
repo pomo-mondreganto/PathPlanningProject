@@ -131,6 +131,12 @@ void XmlLogger::writeToLogOpenClose(const BTSet &open, const FPSet &close, int s
     XMLElement *lowlevel = doc.FirstChildElement(CNS_TAG_ROOT)->FirstChildElement(
             CNS_TAG_LOG)->FirstChildElement(CNS_TAG_LOWLEVEL);
 
+    if (lowlevel == nullptr) {
+        lowlevel = doc.NewElement(CNS_TAG_LOWLEVEL);
+        doc.FirstChildElement(CNS_TAG_ROOT)->FirstChildElement(CNS_TAG_LOG)->InsertEndChild(
+                lowlevel);
+    }
+
     XMLElement *stepEl = doc.NewElement(CNS_TAG_STEP);
     stepEl->SetAttribute(CNS_TAG_ATTR_NUM, step);
     lowlevel->InsertEndChild(stepEl);
@@ -233,4 +239,20 @@ void XmlLogger::writeToLogNotFound() {
     XMLElement *node = doc.FirstChildElement(CNS_TAG_ROOT)->FirstChildElement(
             CNS_TAG_LOG)->FirstChildElement(CNS_TAG_PATH);
     node->InsertEndChild(doc.NewText("Path NOT found!"));
+}
+
+void XmlLogger::simpleWriteNodeInfo(const char *type, std::shared_ptr<Node> n) {
+    if (loglevel != CN_LP_LEVEL_MEDIUM_WORD && loglevel != CN_LP_LEVEL_FULL_WORD) {
+        return;
+    }
+
+    std::cerr << type << " " << n->i << " " << n->j << std::endl;
+}
+
+void XmlLogger::simpleWriteNodeInfo(const char *type, int i, int j) {
+    if (loglevel != CN_LP_LEVEL_MEDIUM_WORD && loglevel != CN_LP_LEVEL_FULL_WORD) {
+        return;
+    }
+
+    std::cerr << type << " " << i << " " << j << std::endl;
 }

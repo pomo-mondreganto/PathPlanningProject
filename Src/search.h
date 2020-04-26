@@ -13,12 +13,12 @@
 
 class Search {
 public:
-    Search(const Map &map, const EnvironmentOptions &options);
+    Search(ILogger *logger, const Map &map, const EnvironmentOptions &options);
 
     virtual ~Search() = 0;
 
     virtual SearchResult
-    startSearch(ILogger *Logger) = 0;
+    startSearch() = 0;
 
 protected:
     std::list<std::pair<int, int>> generateAdjacent(int i, int j);
@@ -44,6 +44,7 @@ protected:
 
     const Map &_map;
     const EnvironmentOptions &_options;
+    ILogger *_logger;
     std::shared_ptr<Node> _goal;
 };
 

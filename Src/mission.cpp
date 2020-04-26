@@ -47,18 +47,18 @@ void Mission::createEnvironmentOptions() {
 void Mission::createSearch() {
     if (config.SearchParams[CN_SP_ST] == CN_SP_ST_ASTAR) {
         std::cout << "Using AStar search" << std::endl;
-        search = std::make_unique<AStar>(map, options);
+        search = std::make_unique<AStar>(logger, map, options);
     } else if (config.SearchParams[CN_SP_ST] == CN_SP_ST_JP_SEARCH) {
         std::cout << "Using JP search" << std::endl;
-        search = std::make_unique<Jps>(map, options);
+        search = std::make_unique<Jps>(logger, map, options);
     } else {
         std::cout << "Using Dijkstra search" << std::endl;
-        search = std::make_unique<Dijkstra>(map, options);
+        search = std::make_unique<Dijkstra>(logger, map, options);
     }
 }
 
 void Mission::startSearch() {
-    sr = search->startSearch(logger);
+    sr = search->startSearch();
 }
 
 void Mission::printSearchResultsToConsole() {

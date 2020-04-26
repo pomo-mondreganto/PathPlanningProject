@@ -6,12 +6,14 @@
 #include "gl_const.h"
 #include <chrono>
 
-AStar::AStar(const Map &map, const EnvironmentOptions &options) : Search(map, options) {
+AStar::AStar(ILogger *logger, const Map &map, const EnvironmentOptions &options) : Search(logger,
+                                                                                          map,
+                                                                                          options) {
     sresult.nodescreated = 0;
 }
 
 SearchResult
-AStar::startSearch(ILogger *logger) {
+AStar::startSearch() {
     f_node_compare comp{_options.breakingties};
 
     OPEN = BTSet(comp);
@@ -24,6 +26,9 @@ AStar::startSearch(ILogger *logger) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = _map.get_start_node();
+
+    _logger->simpleWriteNodeInfo("START", start);
+    _logger->simpleWriteNodeInfo("TERM", _goal);
 
     IN_OPEN.insert(start);
     OPEN.insert(start);
@@ -46,14 +51,14 @@ AStar::startSearch(ILogger *logger) {
             new_node->parent = cur;
         }
 
-        logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
-                                    false);
+        _logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                     false);
     }
 
     sresult.nodescreated = OPEN.size() + CLOSED.size();
 
-    logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
-                                true);
+    _logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                 true);
 
     if (CLOSED.count(_goal) == 0) {
         sresult.pathfound = false;

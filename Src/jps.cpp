@@ -216,6 +216,9 @@ Jps::startSearch(ILogger *logger) {
         for (auto &it : jump_points) {
             it->parent = cur;
         }
+
+        logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
+                                    false);
     }
 
     sresult.nodescreated = OPEN.size() + CLOSED.size();
@@ -254,45 +257,5 @@ Jps::startSearch(ILogger *logger) {
 
     return sresult;
 }
-
-std::shared_ptr<Node>
-Jps::createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj, bool add) {
-    std::shared_ptr<Node> to_add = std::make_shared<Node>(i, j, 0);
-    to_add->di = di;
-    to_add->dj = dj;
-    to_add->g = prev->g + getDistance(prev, to_add, CN_SP_MT_EUCL);
-    to_add->H = getDistance(to_add, _goal, _options.metrictype);
-    to_add->F = to_add->g + _options.heuristicheight * to_add->H;
-
-    if (add) {
-        auto it = IN_OPEN.find(to_add);
-        if (it != IN_OPEN.end()) {
-            if ((*it)->F > to_add->F) {
-                IN_OPEN.erase(it);
-                IN_OPEN.insert(to_add);
-                OPEN.erase(*it);
-                OPEN.insert(to_add);
-            }
-        } else {
-            IN_OPEN.insert(to_add);
-            OPEN.insert(to_add);
-        }
-    }
-
-    return to_add;
-}
-
-std::shared_ptr<Node>
-Jps::addToClosed(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj) {
-    std::shared_ptr<Node> to_add = std::make_shared<Node>(i, j, 0);
-    to_add->di = di;
-    to_add->dj = dj;
-    to_add->g = prev->g + getDistance(prev, to_add, CN_SP_MT_EUCL);
-    to_add->H = getDistance(to_add, _goal, _options.metrictype);
-    to_add->F = to_add->g + _options.heuristicheight * to_add->H;
-
-    return to_add;
-}
-
 
 Jps::~Jps() = default;

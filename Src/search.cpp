@@ -5,8 +5,8 @@ Search::Search(const Map &map, const EnvironmentOptions &options) : _map(map), _
 
 Search::~Search() = default;
 
-std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j) {
-    std::list<std::shared_ptr<Node>> result;
+std::list<std::pair<int, int>> Search::generateAdjacent(int i, int j) {
+    std::list<std::pair<int, int>> result;
 
     /*
      526
@@ -20,7 +20,7 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j) {
         int ni = i + di[d];
         int nj = j + dj[d];
         if (_map.CellOnGrid(ni, nj) && _map.CellIsTraversable(ni, nj)) {
-            result.push_back(std::make_shared<Node>(ni, nj, 0));
+            result.emplace_back(ni, nj);
         }
     }
 
@@ -55,7 +55,7 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j) {
         if (cnt_blocked == 0 ||
             (cnt_blocked == 1 && _options.cutcorners) ||
             (cnt_blocked == 2 && _options.allowsqueeze)) {
-            result.push_back(std::make_shared<Node>(ni, nj, 0));
+            result.emplace_back(ni, nj);
         }
     }
 
@@ -79,6 +79,33 @@ Search::getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<No
         default:
             return -1;
     }
+}
+
+std::shared_ptr<Node>
+Search::createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj, bool add) {
+    std::shared_ptr<Node> to_add = std::make_shared<Node>(i, j, 0);
+    to_add->di = di;
+    to_add->dj = dj;
+    to_add->g = prev->g + getDistance(prev, to_add, CN_SP_MT_EUCL);
+    to_add->H = getDistance(to_add, _goal, _options.metrictype);
+    to_add->F = to_add->g + _options.heuristicheight * to_add->H;
+
+    if (add && CLOSED.find(to_add) == CLOSED.end()) {
+        auto it = IN_OPEN.find(to_add);
+        if (it != IN_OPEN.end()) {
+            if ((*it)->F > to_add->F) {
+                IN_OPEN.erase(it);
+                IN_OPEN.insert(to_add);
+                OPEN.erase(*it);
+                OPEN.insert(to_add);
+            }
+        } else {
+            IN_OPEN.insert(to_add);
+            OPEN.insert(to_add);
+        }
+    }
+
+    return to_add;
 }
 
 void Search::buildHPPath() {

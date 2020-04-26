@@ -24,11 +24,10 @@ AStar::startSearch(ILogger *logger) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<Node> start = _map.get_start_node();
-    std::shared_ptr<Node> goal = _map.get_goal_node();
 
     IN_OPEN.insert(start);
     OPEN.insert(start);
-    while (!OPEN.empty() && CLOSED.count(goal) == 0) {
+    while (!OPEN.empty() && CLOSED.count(_goal) == 0) {
         std::shared_ptr<Node> cur = *OPEN.begin();
 
         OPEN.erase(OPEN.begin());
@@ -40,32 +39,10 @@ AStar::startSearch(ILogger *logger) {
         CLOSED.insert(cur);
         ++sresult.numberofsteps;
 
-        std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j);
+        std::list<std::pair<int, int>> adj = generateAdjacent(cur->i, cur->j);
 
         for (auto &n: adj) {
-            if (CLOSED.count(n)) {
-                continue;
-            }
-            double dist = getDistance(cur, n, CN_SP_MT_EUCL);
-            double heuristic = getDistance(n, goal, _options.metrictype);
-
-            n->g = cur->g + dist;
-            n->H = heuristic;
-            n->F = n->g + _options.heuristicheight * heuristic;
-            n->parent = cur;
-
-            auto it = IN_OPEN.find(n);
-            if (it != IN_OPEN.end()) {
-                if ((*it)->F > n->F) {
-                    IN_OPEN.erase(it);
-                    IN_OPEN.insert(n);
-                    OPEN.erase(*it);
-                    OPEN.insert(n);
-                }
-            } else {
-                IN_OPEN.insert(n);
-                OPEN.insert(n);
-            }
+            createNode(cur, n.first, n.second, 0, 0);
         }
 
         logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
@@ -77,7 +54,7 @@ AStar::startSearch(ILogger *logger) {
     logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
                                 true);
 
-    if (CLOSED.count(goal) == 0) {
+    if (CLOSED.count(_goal) == 0) {
         sresult.pathfound = false;
         sresult.pathlength = 0;
 
@@ -87,12 +64,12 @@ AStar::startSearch(ILogger *logger) {
         return sresult;
     }
 
-    std::shared_ptr<Node> real_goal = *CLOSED.find(goal);
+    std::shared_ptr<Node> real_goal = *CLOSED.find(_goal);
     sresult.pathfound = true;
     sresult.pathlength = static_cast<float>(real_goal->g);
-    goal = real_goal;
+    std::shared_ptr<Node> goal = real_goal;
 
-    while (goal->v_key() != start->v_key()) {
+    while (goal->v_key() != _map.get_start_node()->v_key()) {
         lppath.push_front(*goal);
         goal = goal->parent;
     }

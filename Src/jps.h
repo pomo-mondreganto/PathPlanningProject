@@ -26,12 +26,6 @@ protected:
 
     std::list<std::shared_ptr<Node>>
     diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj);
-
-    std::shared_ptr<Node>
-    createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj, bool add = true);
-
-    std::shared_ptr<Node>
-    addToClosed(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj);
 };
 
 

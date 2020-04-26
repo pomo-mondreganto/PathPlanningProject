@@ -21,7 +21,7 @@ public:
     startSearch(ILogger *Logger) = 0;
 
 protected:
-    std::list<std::shared_ptr<Node>> generateAdjacent(int i, int j);
+    std::list<std::pair<int, int>> generateAdjacent(int i, int j);
 
     static double
     getDistance(const std::shared_ptr<Node> &first, const std::shared_ptr<Node> &second,
@@ -29,6 +29,9 @@ protected:
 
     static double
     getTime(const TP &start, const TP &end);
+
+    std::shared_ptr<Node>
+    createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj, bool add = true);
 
     void buildHPPath();
 

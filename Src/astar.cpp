@@ -6,25 +6,25 @@
 #include "gl_const.h"
 #include <chrono>
 
-AStar::AStar() {
+AStar::AStar(const Map &map, const EnvironmentOptions &options) : Search(map, options) {
     sresult.nodescreated = 0;
 }
 
 SearchResult
-AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &options) {
-    f_node_compare comp{options.breakingties};
+AStar::startSearch(ILogger *logger) {
+    f_node_compare comp{_options.breakingties};
 
     OPEN = BTSet(comp);
 
-    if (map.getMapHeight() * map.getMapWidth() > BIG_MAP_THRESHOLD) {
+    if (_map.getMapHeight() * _map.getMapWidth() > BIG_MAP_THRESHOLD) {
         CLOSED.rehash(INITIAL_FPSET_SIZE);
         IN_OPEN.rehash(INITIAL_FPSET_SIZE);
     }
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    std::shared_ptr<Node> start = map.get_start_node();
-    std::shared_ptr<Node> goal = map.get_goal_node();
+    std::shared_ptr<Node> start = _map.get_start_node();
+    std::shared_ptr<Node> goal = _map.get_goal_node();
 
     IN_OPEN.insert(start);
     OPEN.insert(start);
@@ -40,18 +40,18 @@ AStar::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &op
         CLOSED.insert(cur);
         ++sresult.numberofsteps;
 
-        std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j, map, options);
+        std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j);
 
         for (auto &n: adj) {
             if (CLOSED.count(n)) {
                 continue;
             }
             double dist = getDistance(cur, n, CN_SP_MT_EUCL);
-            double heuristic = getDistance(n, goal, options.metrictype);
+            double heuristic = getDistance(n, goal, _options.metrictype);
 
             n->g = cur->g + dist;
             n->H = heuristic;
-            n->F = n->g + options.heuristicheight * heuristic;
+            n->F = n->g + _options.heuristicheight * heuristic;
             n->parent = cur;
 
             auto it = IN_OPEN.find(n);

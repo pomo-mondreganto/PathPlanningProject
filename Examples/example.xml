@@ -37,12 +37,12 @@
         </grid>
     </map>
     <algorithm>
-        <searchtype>astar</searchtype>
+        <searchtype>jp_search</searchtype>
         <metrictype>diagonal</metrictype>
         <breakingties>g-max</breakingties>
         <hweight>1</hweight>
         <allowdiagonal>true</allowdiagonal>
-        <cutcorners>false</cutcorners>
+        <cutcorners>true</cutcorners>
         <allowsqueeze>false</allowsqueeze>
     </algorithm>
     <options>

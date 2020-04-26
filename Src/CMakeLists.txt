@@ -14,7 +14,7 @@ set(HEADERS
         search.h
         searchresult.h
         tinyxml2.h
-        xmllogger.h)
+        xmllogger.h jps.cpp jps.h)
 
 set(SOURCES
         astar.cpp
@@ -25,9 +25,9 @@ set(SOURCES
         mission.cpp
         search.cpp
         tinyxml2.cpp
-        xmllogger.cpp)
+        xmllogger.cpp jps.cpp jps.h)
 
-add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp)
+add_executable(PathPlanning ${HEADERS} ${SOURCES} main.cpp jps.cpp jps.h)
 
 add_library(PPLIB ${HEADERS} ${SOURCES})
 

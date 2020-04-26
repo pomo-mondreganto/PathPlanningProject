@@ -1,11 +1,11 @@
 #include "search.h"
 
-Search::Search() = default;
+Search::Search(const Map &map, const EnvironmentOptions &options) : _map(map), _options(options),
+                                                                    _goal(map.get_goal_node()) {}
 
 Search::~Search() = default;
 
-std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Map &map,
-                                                          const EnvironmentOptions &options) {
+std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j) {
     std::list<std::shared_ptr<Node>> result;
 
     /*
@@ -19,12 +19,12 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
     for (size_t d = 0; d < di.size(); ++d) {
         int ni = i + di[d];
         int nj = j + dj[d];
-        if (map.CellOnGrid(ni, nj) && map.CellIsTraversable(ni, nj)) {
+        if (_map.CellOnGrid(ni, nj) && _map.CellIsTraversable(ni, nj)) {
             result.push_back(std::make_shared<Node>(ni, nj, 0));
         }
     }
 
-    if (!options.allowdiagonal) {
+    if (!_options.allowdiagonal) {
         return result;
     }
 
@@ -34,7 +34,7 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
         int ni = i + diag_di[d];
         int nj = j + diag_dj[d];
 
-        if (!map.CellOnGrid(ni, nj) || !map.CellIsTraversable(ni, nj)) {
+        if (!_map.CellOnGrid(ni, nj) || !_map.CellIsTraversable(ni, nj)) {
             continue;
         }
 
@@ -44,17 +44,17 @@ std::list<std::shared_ptr<Node>> Search::generateAdjacent(int i, int j, const Ma
         int a2j = j + dj[(d + 1) % dj.size()];
 
         int cnt_blocked = 0;
-        if (!map.CellIsTraversable(a1i, a1j)) {
+        if (!_map.CellIsTraversable(a1i, a1j)) {
             ++cnt_blocked;
         }
 
-        if (!map.CellIsTraversable(a2i, a2j)) {
+        if (!_map.CellIsTraversable(a2i, a2j)) {
             ++cnt_blocked;
         }
 
         if (cnt_blocked == 0 ||
-            (cnt_blocked == 1 && options.cutcorners) ||
-            (cnt_blocked == 2 && options.allowsqueeze)) {
+            (cnt_blocked == 1 && _options.cutcorners) ||
+            (cnt_blocked == 2 && _options.allowsqueeze)) {
             result.push_back(std::make_shared<Node>(ni, nj, 0));
         }
     }

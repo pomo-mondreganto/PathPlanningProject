@@ -350,3 +350,7 @@ std::shared_ptr<Node> Map::get_start_node() const {
 std::shared_ptr<Node> Map::get_goal_node() const {
     return std::make_unique<Node>(goal_i, goal_j, 0);
 }
+
+bool Map::CellIsBlocked(int i, int j) const {
+    return !CellOnGrid(i, j) || CellIsObstacle(i, j);
+}

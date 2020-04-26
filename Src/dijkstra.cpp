@@ -9,17 +9,17 @@
 #include <list>
 #include <chrono>
 
-Dijkstra::Dijkstra() {
+Dijkstra::Dijkstra(const Map &map, const EnvironmentOptions &options) : Search(map, options) {
     sresult.nodescreated = 0;
 }
 
 SearchResult
-Dijkstra::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions &options) {
+Dijkstra::startSearch(ILogger *logger) {
     OPEN = BTSet(g_node_compare{});
     TP start_time = std::chrono::high_resolution_clock::now();
 
-    std::shared_ptr<Node> start = map.get_start_node();
-    std::shared_ptr<Node> goal = map.get_goal_node();
+    std::shared_ptr<Node> start = _map.get_start_node();
+    std::shared_ptr<Node> goal = _map.get_goal_node();
 
     OPEN.insert(start);
     while (!OPEN.empty() && CLOSED.count(goal) == 0) {
@@ -31,7 +31,7 @@ Dijkstra::startSearch(ILogger *logger, const Map &map, const EnvironmentOptions 
         CLOSED.insert(cur);
         ++sresult.numberofsteps;
 
-        std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j, map, options);
+        std::list<std::shared_ptr<Node>> adj = generateAdjacent(cur->i, cur->j);
 
         for (auto &n: adj) {
             if (CLOSED.count(n)) {

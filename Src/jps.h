@@ -1,0 +1,38 @@
+//
+// Created by Roman Nikitin on 26.04.2020.
+//
+
+#ifndef PATHPLANNING_JPS_H
+#define PATHPLANNING_JPS_H
+
+#include "search.h"
+#include "node.h"
+
+class Jps : public Search {
+public:
+    Jps(const Map &map, const EnvironmentOptions &options);
+
+    ~Jps() override;
+
+    SearchResult
+    startSearch(ILogger *Logger) override;
+
+protected:
+    std::list<std::shared_ptr<Node>>
+    horSearch(const std::shared_ptr<Node> &from, int dj);
+
+    std::list<std::shared_ptr<Node>>
+    vertSearch(const std::shared_ptr<Node> &from, int di);
+
+    std::list<std::shared_ptr<Node>>
+    diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj);
+
+    std::shared_ptr<Node>
+    createNode(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj, bool add = true);
+
+    std::shared_ptr<Node>
+    addToClosed(const std::shared_ptr<Node> &prev, int i, int j, int di, int dj);
+};
+
+
+#endif //PATHPLANNING_JPS_H

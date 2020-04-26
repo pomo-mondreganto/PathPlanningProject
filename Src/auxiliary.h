@@ -43,13 +43,15 @@ struct node_ptr_hasher {
         std::size_t seed(0);
         ::hash_combine(seed, p->i);
         ::hash_combine(seed, p->j);
+        ::hash_combine(seed, p->di);
+        ::hash_combine(seed, p->dj);
         return seed;
     }
 };
 
 struct node_ptr_equal_to {
     bool operator()(const std::shared_ptr<Node> &n1, const std::shared_ptr<Node> &n2) const {
-        return n1->i == n2->i && n1->j == n2->j;
+        return std::tie(n1->i, n1->j, n1->di, n1->dj) == std::tie(n2->i, n2->j, n2->di, n2->dj);
     }
 };
 
@@ -66,7 +68,7 @@ struct g_node_compare {
         if (!almost_equal(n1->g, n2->g, 8)) {
             return n1->g < n2->g;
         }
-        return n1->v_key() < n2->v_key();
+        return n1->full_key() < n2->full_key();
     }
 };
 
@@ -83,7 +85,7 @@ struct f_node_compare {
                 return n1->g > n2->g;
             }
         }
-        return n1->v_key() < n2->v_key();
+        return n1->full_key() < n2->full_key();
     }
 };
 

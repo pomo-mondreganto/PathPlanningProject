@@ -17,12 +17,12 @@
 
 class Dijkstra : public Search {
 public:
-    Dijkstra();
+    Dijkstra(const Map &map, const EnvironmentOptions &options);
 
     ~Dijkstra() override;
 
     SearchResult
-    startSearch(ILogger *Logger, const Map &map, const EnvironmentOptions &options) override;
+    startSearch(ILogger *Logger) override;
 };
 
 

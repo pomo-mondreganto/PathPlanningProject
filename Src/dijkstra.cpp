@@ -34,7 +34,8 @@ Dijkstra::startSearch(ILogger *logger) {
         std::list<std::pair<int, int>> adj = generateAdjacent(cur->i, cur->j);
 
         for (auto &n: adj) {
-            createNode(cur, n.first, n.second, 0, 0);
+            std::shared_ptr<Node> new_node = createNode(cur, n.first, n.second, 0, 0);
+            new_node->parent = cur;
         }
         logger->writeToLogOpenClose(OPEN, CLOSED, static_cast<int>(sresult.numberofsteps) - 1,
                                     false);

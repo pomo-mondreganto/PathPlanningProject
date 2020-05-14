@@ -26,6 +26,9 @@ protected:
 
     std::list<std::shared_ptr<Node>>
     diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj);
+
+    std::list<std::shared_ptr<Node>>
+    runScan(const std::shared_ptr<Node> &from);
 };
 
 

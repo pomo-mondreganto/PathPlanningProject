@@ -2,3 +2,4 @@
 Bin/
 Build/
 Tests/CMakeFiles
+*_log.xml

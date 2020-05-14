@@ -34,13 +34,31 @@ Jps::horSearch(const std::shared_ptr<Node> &from, int dj) {
             break;
         }
 
-        int j2 = j1 + dj;
-        if (_map.CellIsBlocked(i1 - 1, j1) && !_map.CellIsBlocked(i1 - 1, j2)) {
-            result.push_back(createNode(from, i1, j1, -1, dj));
-        }
+        if (_options.cutcorners) {
+            int j2 = j1 + dj;
+            if (_map.CellIsBlocked(i1 - 1, j1) && !_map.CellIsBlocked(i1 - 1, j2)) {
+                result.push_back(createNode(from, i1, j1, -1, dj));
+            }
 
-        if (_map.CellIsBlocked(i1 + 1, j1) && !_map.CellIsBlocked(i1 + 1, j2)) {
-            result.push_back(createNode(from, i1, j1, 1, dj));
+            if (_map.CellIsBlocked(i1 + 1, j1) && !_map.CellIsBlocked(i1 + 1, j2)) {
+                result.push_back(createNode(from, i1, j1, 1, dj));
+            }
+        } else {
+            if (_map.CellIsBlocked(i1 - 1, j1 - dj) && !_map.CellIsBlocked(i1 - 1, j1)) {
+                result.push_back(createNode(from, i1, j1, -1, 0));
+                result.push_back(createNode(from, i1, j1, -1, dj));
+                result.push_back(createNode(from, i1, j1, -1, -dj));
+            }
+
+            if (_map.CellIsBlocked(i1 + 1, j1 - dj) && !_map.CellIsBlocked(i1 + 1, j1)) {
+                result.push_back(createNode(from, i1, j1, 1, 0));
+                result.push_back(createNode(from, i1, j1, 1, dj));
+                result.push_back(createNode(from, i1, j1, 1, -dj));
+            }
+        }
+        if (!_options.allowdiagonal) {
+            result.push_back(createNode(from, i1, j1, 1, 0));
+            result.push_back(createNode(from, i1, j1, -1, 0));
         }
 
         if (!result.empty()) {
@@ -73,13 +91,32 @@ Jps::vertSearch(const std::shared_ptr<Node> &from, int di) {
             break;
         }
 
-        int i2 = i1 + di;
-        if (_map.CellIsBlocked(i1, j1 - 1) && !_map.CellIsBlocked(i2, j1 - 1)) {
-            result.push_back(createNode(from, i1, j1, di, -1));
+        if (_options.cutcorners) {
+            int i2 = i1 + di;
+            if (_map.CellIsBlocked(i1, j1 - 1) && !_map.CellIsBlocked(i2, j1 - 1)) {
+                result.push_back(createNode(from, i1, j1, di, -1));
+            }
+
+            if (_map.CellIsBlocked(i1, j1 + 1) && !_map.CellIsBlocked(i2, j1 + 1)) {
+                result.push_back(createNode(from, i1, j1, di, 1));
+            }
+        } else {
+            if (_map.CellIsBlocked(i1 - di, j1 - 1) && !_map.CellIsBlocked(i1, j1 - 1)) {
+                result.push_back(createNode(from, i1, j1, 0, -1));
+                result.push_back(createNode(from, i1, j1, di, -1));
+                result.push_back(createNode(from, i1, j1, -di, -1));
+            }
+
+            if (_map.CellIsBlocked(i1 - di, j1 + 1) && !_map.CellIsBlocked(i1, j1 + 1)) {
+                result.push_back(createNode(from, i1, j1, 0, 1));
+                result.push_back(createNode(from, i1, j1, di, 1));
+                result.push_back(createNode(from, i1, j1, -di, 1));
+            }
         }
 
-        if (_map.CellIsBlocked(i1, j1 + 1) && !_map.CellIsBlocked(i2, j1 + 1)) {
-            result.push_back(createNode(from, i1, j1, di, 1));
+        if (!_options.allowdiagonal) {
+            result.push_back(createNode(from, i1, j1, 0, 1));
+            result.push_back(createNode(from, i1, j1, 0, -1));
         }
 
         if (!result.empty()) {
@@ -99,12 +136,29 @@ Jps::diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj) {
     std::shared_ptr<Node> goal = _map.get_goal_node();
     std::list<std::shared_ptr<Node>> result;
 
+    if (!_options.allowdiagonal) {
+        return result;
+    }
+
     while (true) {
         int i0 = i1;
         int j0 = j1;
+
         i1 = i1 + di;
         j1 = j1 + dj;
         if (_map.CellIsBlocked(i1, j1)) {
+            break;
+        }
+
+        int cnt_blocked = 0;
+        cnt_blocked += _map.CellIsBlocked(i1, j0);
+        cnt_blocked += _map.CellIsBlocked(i0, j1);
+
+        if (cnt_blocked == 1 && !_options.cutcorners) {
+            break;
+        }
+
+        if (cnt_blocked == 2 && !_options.allowsqueeze) {
             break;
         }
 
@@ -175,6 +229,17 @@ Jps::diagonalSearch(const std::shared_ptr<Node> &from, int di, int dj) {
     return result;
 }
 
+std::list<std::shared_ptr<Node>>
+Jps::runScan(const std::shared_ptr<Node> &from) {
+    if (from->di && from->dj) {
+        return diagonalSearch(from, from->di, from->dj);
+    }
+    if (from->di) {
+        return vertSearch(from, from->di);
+    }
+    return horSearch(from, from->dj);
+}
+
 SearchResult
 Jps::startSearch() {
     _goal = _map.get_goal_node();
@@ -199,6 +264,9 @@ Jps::startSearch() {
             if (!di && !dj) {
                 continue;
             }
+            if (!_options.allowdiagonal && di && dj) {
+                continue;
+            }
             createNode(start, start->i, start->j, di, dj);
         }
     }
@@ -215,14 +283,7 @@ Jps::startSearch() {
         CLOSED.insert(cur);
         ++sresult.numberofsteps;
 
-        std::list<std::shared_ptr<Node>> jump_points;
-        if (cur->di && cur->dj) {
-            jump_points = diagonalSearch(cur, cur->di, cur->dj);
-        } else if (cur->di) {
-            jump_points = vertSearch(cur, cur->di);
-        } else {
-            jump_points = horSearch(cur, cur->dj);
-        }
+        std::list<std::shared_ptr<Node>> jump_points = runScan(cur);
 
         for (auto &it : jump_points) {
             it->parent = cur;

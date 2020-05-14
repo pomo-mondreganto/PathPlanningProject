@@ -54,6 +54,7 @@ def parse(test, stderr):
 
     image = Image.fromarray(data)
     image.save(f'/tmp/vis_{secrets.token_hex(10)}.png')
+    image.show()
 
 
 if __name__ == '__main__':

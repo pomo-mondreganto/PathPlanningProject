@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 
+import argparse
 import subprocess
-import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import animation
 from lxml import etree
+from matplotlib import animation
+from matplotlib import pyplot as plt
+
+from custom_writer import FasterFFMpegWriter
 
 BASE_DIR = Path(__file__).absolute().resolve().parents[1]
 EXEC_PATH = BASE_DIR / 'Bin' / 'Debug' / 'PathPlanning'
 
-PER_PIXEL = 9
+PER_PIXEL = 1
 
 
 def set_pixel(blocked, data, i, j, pix, sz=PER_PIXEL):
@@ -30,7 +32,7 @@ def parse(test, stderr, dst_path):
                     test.find('map').find('grid').findall('row')))
     data = np.zeros((PER_PIXEL * len(rows), PER_PIXEL * len(rows[0]), 3), dtype=np.uint8)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12, 12))
     images = []
 
     blocked = set()
@@ -72,16 +74,52 @@ def parse(test, stderr, dst_path):
         if step % draw_interval == 0 or step == len(log) - 1:
             images.append([plt.imshow(data, animated=True)])
 
+        if step % 1000 == 0 or step == len(log) - 1:
+            print(f'Done {step + 1} steps of {len(log)}')
+
+    writer = FasterFFMpegWriter(fps=15, bitrate=1800)
     ani = animation.ArtistAnimation(fig, images, interval=interval, blit=True, repeat=False)
-    ani.save(dst_path)
+    ani.save(dst_path, writer=writer)
 
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(f'Usage: {sys.argv[0]} test_file')
-        exit(1)
+def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze):
+    with NamedTemporaryFile(suffix='.xml', delete=False) as tmp_f:
+        algo_el = root.find('algorithm')
+        algo_el.find('searchtype').text = algorithm
+        algo_el.find('hweight').text = str(hweight)
+        algo_el.find('metrictype').text = metric
+        algo_el.find('breakingties').text = bt
+        algo_el.find('allowdiagonal').text = str(allow_diagonal)
+        algo_el.find('cutcorners').text = str(cut_corners)
+        algo_el.find('allowsqueeze').text = str(allow_squeeze)
+        etree.ElementTree(root).write(tmp_f)
+        tmp_f.close()
 
-    test_path = (Path().cwd() / sys.argv[1]).resolve()
+        p = subprocess.Popen(
+            [EXEC_PATH, tmp_f.name],
+            cwd=BASE_DIR,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        out, err = p.communicate()
+
+    fname = f'ani_{algorithm}_{metric}_{bt}'
+    if allow_diagonal:
+        fname += '_allowdiagonal'
+    if cut_corners:
+        fname += '_cutcorners'
+    if allow_squeeze:
+        fname += '_allowsqueeze'
+
+    dst_path = (Path(__file__).resolve().parent / 'animations_temp' / fname)
+    dst_path = dst_path.with_suffix('.mp4')
+
+    parse(root, err.decode(), dst_path)
+    print('Done', dst_path)
+
+
+def run_all(args):
+    test_path = (Path().cwd() / args.file).resolve()
     test_data = test_path.read_text()
     root = etree.fromstring(test_data)
     root.find('options').find('loglevel').text = '1.5'
@@ -105,35 +143,47 @@ if __name__ == '__main__':
                             if allow_squeeze and (not cut_corners or not allow_diagonal):
                                 continue
 
-                            with NamedTemporaryFile(suffix='.xml', delete=False) as tmp_f:
-                                algo_el = root.find('algorithm')
-                                algo_el.find('searchtype').text = algorithm
-                                algo_el.find('metrictype').text = metric
-                                algo_el.find('breakingties').text = bt
-                                algo_el.find('allowdiagonal').text = str(allow_diagonal)
-                                algo_el.find('cutcorners').text = str(cut_corners)
-                                algo_el.find('allowsqueeze').text = str(allow_squeeze)
-                                etree.ElementTree(root).write(tmp_f)
-                                tmp_f.close()
+                            generate(root, algorithm, metric, 1.0, bt, allow_diagonal, cut_corners,
+                                     allow_squeeze)
 
-                                p = subprocess.Popen(
-                                    [EXEC_PATH, tmp_f.name],
-                                    cwd=BASE_DIR,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                )
-                                out, err = p.communicate()
 
-                            fname = f'ani_{algorithm}_{metric}_{bt}'
-                            if allow_diagonal:
-                                fname += '_allowdiagonal'
-                            if cut_corners:
-                                fname += '_cutcorners'
-                            if allow_squeeze:
-                                fname += '_allowsqueeze'
+def run_custom(args):
+    test_path = (Path().cwd() / args.file).resolve()
+    test_data = test_path.read_text()
+    root = etree.fromstring(test_data)
+    root.find('options').find('loglevel').text = '1.5'
 
-                            dst_path = (Path(__file__).resolve().parent / 'animations' / fname)
-                            dst_path = dst_path.with_suffix('.mp4')
+    generate(root, algorithm=args.algorithm, metric=args.metric, hweight=args.hweight,
+             bt=args.breakingties, allow_diagonal=args.allowdiagonal, cut_corners=args.cutcorners,
+             allow_squeeze=args.allowsqueeze)
 
-                            parse(root, err.decode(), dst_path)
-                            print('Done', dst_path)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Create visualisation for a test')
+    parser.add_argument('--file', type=str, metavar='PATH', help='Path to test file', required=True)
+
+    subparsers = parser.add_subparsers()
+
+    all_parser = subparsers.add_parser('all', help='Bruteforce all options')
+    all_parser.set_defaults(func=run_all)
+
+    custom_parser = subparsers.add_parser('custom', help='Pass custom options')
+    custom_parser.set_defaults(func=run_custom)
+
+    custom_parser.add_argument('--algorithm', type=str, help='Algorithm to run',
+                               default='jp_search')
+    custom_parser.add_argument('--metric', type=str, help='Heuristic metric to use',
+                               default='manhattan')
+    custom_parser.add_argument('--hweight', type=float, help='Heuristic weight to use',
+                               default=1.0)
+    custom_parser.add_argument('--breakingties', type=str, help='Tie-breaking strategy',
+                               default='g-min')
+    custom_parser.add_argument('--allowdiagonal', type=int, help='Allow diagonal moves (0/1)',
+                               default='1')
+    custom_parser.add_argument('--cutcorners', type=int, help='Allow cutting corners (0/1)',
+                               default='1')
+    custom_parser.add_argument('--allowsqueeze', type=int, help='Allow squeezing (0/1)',
+                               default='1')
+
+    parsed = parser.parse_args()
+    parsed.func(parsed)

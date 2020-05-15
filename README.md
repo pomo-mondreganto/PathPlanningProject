@@ -162,23 +162,23 @@ PathPlanning.exe ../../Examples/example.xml
 
 ---
 Алгоритм Дейкстры. Синим выделена точка старта, розовым выделена точка финиша. Красным выделены все 
-рассмотренные вершины.
+рассмотренные вершины (добавленные в список OPEN).
 
-![dijkstra](Images/dijkstra.png)
+![dijkstra](Images/ani_dijkstra_manhattan_g-min_allowdiagonal_cutcorners.png)
  
 ---
 
 Алгоритм A*. Цвета аналогичны алгоритму Дейкстры.
 
-![astar](Images/astar.png)
+![astar](Images/ani_astar_manhattan_g-min_allowdiagonal_cutcorners.png)
 
 ---
 
-Алгоритм A*. Красным выделены вершины, помещенные в список OPEN, зеленым выделены все рассмотренные 
-вершины. Из-за маленького числа "тяжелых" операций добавления в список OPEN алгоритм отрабатывает 
-быстрее.
+Алгоритм JPS. Красным выделены вершины, помещенные в список OPEN, зеленым выделены все рассмотренные 
+вершины. Из-за маленького числа асимптотически долгих операций добавления в список OPEN алгоритм 
+быстрее находит путь.
 
-![jps](Images/jps.png)
+![jps](Images/ani_jp_search_manhattan_g-min_allowdiagonal_cutcorners.png)
 
 
 ## Тестирование 

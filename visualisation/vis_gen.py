@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 
 import matplotlib
 import numpy as np
+from PIL import Image
 from lxml import etree
 from matplotlib import animation
 from matplotlib import pyplot as plt
@@ -30,7 +31,7 @@ def set_pixel(blocked, data, i, j, pix, sz=PER_PIXEL):
             coord[di, dj] = pix
 
 
-def parse(test, stderr, dst_path):
+def parse(test, stderr, dst_path, gen_image=False):
     rows = list(map(lambda x: list(map(int, x.text.split(' '))),
                     test.find('map').find('grid').findall('row')))
     data = np.zeros((PER_PIXEL * len(rows), PER_PIXEL * len(rows[0]), 3), dtype=np.uint8)
@@ -60,6 +61,7 @@ def parse(test, stderr, dst_path):
         if 'LOOK' in line:
             color = [0, 255, 0]
         elif 'OPEN' in line:
+            block = gen_image
             color = [255, 0, 0]
         elif 'START' in line:
             block = True
@@ -74,20 +76,25 @@ def parse(test, stderr, dst_path):
         if block:
             blocked.add((i, j))
 
-        if step % draw_interval == 0 or step == len(log) - 1:
+        if not gen_image and step % draw_interval == 0 or step == len(log) - 1:
             images.append([plt.imshow(data, animated=True)])
 
         if step % 1000 == 0 or step == len(log) - 1:
             print(f'Done {step + 1} steps of {len(log)}')
 
-    print('Creating animation (can take a while)...')
+    if gen_image:
+        img = Image.fromarray(data)
+        img = img.resize((512, 512))
+        img.save(dst_path)
+    else:
+        print('Creating animation (can take a while)...')
+        writer = FasterFFMpegWriter()
+        ani = animation.ArtistAnimation(fig, images, interval=interval, blit=True, repeat=False)
+        ani.save(dst_path, writer=writer)
 
-    writer = FasterFFMpegWriter()
-    ani = animation.ArtistAnimation(fig, images, interval=interval, blit=True, repeat=False)
-    ani.save(dst_path, writer=writer)
 
-
-def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze):
+def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze,
+             gen_image=False):
     with NamedTemporaryFile(suffix='.xml', delete=False) as tmp_f:
         algo_el = root.find('algorithm')
         algo_el.find('searchtype').text = algorithm
@@ -116,10 +123,17 @@ def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, 
     if allow_squeeze:
         fname += '_allowsqueeze'
 
-    dst_path = (Path(__file__).resolve().parent / 'animations_temp' / fname)
-    dst_path = dst_path.with_suffix('.mp4')
+    if gen_image:
+        res_dir = 'images_temp'
+        suffix = '.png'
+    else:
+        res_dir = 'animations_temp'
+        suffix = '.mp4'
 
-    parse(root, err.decode(), dst_path)
+    dst_path = (Path(__file__).resolve().parent / res_dir / fname)
+    dst_path = dst_path.with_suffix(suffix)
+
+    parse(root, err.decode(), dst_path, gen_image)
     print('Done', dst_path)
 
 
@@ -160,6 +174,17 @@ def run_custom(args):
 
     generate(root, algorithm=args.algorithm, metric=args.metric, hweight=args.hweight,
              bt=args.breakingties, allow_diagonal=args.allowdiagonal, cut_corners=args.cutcorners,
+             allow_squeeze=args.allowsqueeze, gen_image=args.image)
+
+
+def run_image(args):
+    test_path = (Path().cwd() / args.file).resolve()
+    test_data = test_path.read_text()
+    root = etree.fromstring(test_data)
+    root.find('options').find('loglevel').text = '1.5'
+
+    generate(root, algorithm=args.algorithm, metric=args.metric, hweight=args.hweight,
+             bt=args.breakingties, allow_diagonal=args.allowdiagonal, cut_corners=args.cutcorners,
              allow_squeeze=args.allowsqueeze)
 
 
@@ -189,6 +214,7 @@ if __name__ == '__main__':
                                default='1')
     custom_parser.add_argument('--allowsqueeze', type=int, help='Allow squeezing (0/1)',
                                default='1')
+    custom_parser.add_argument('--image', action='store_true', help='Generate the final image only')
 
     parsed = parser.parse_args()
     parsed.func(parsed)

@@ -5,12 +5,15 @@ import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import matplotlib
 import numpy as np
 from lxml import etree
 from matplotlib import animation
 from matplotlib import pyplot as plt
 
 from custom_writer import FasterFFMpegWriter
+
+matplotlib.use('agg')
 
 BASE_DIR = Path(__file__).absolute().resolve().parents[1]
 EXEC_PATH = BASE_DIR / 'Bin' / 'Debug' / 'PathPlanning'
@@ -32,7 +35,7 @@ def parse(test, stderr, dst_path):
                     test.find('map').find('grid').findall('row')))
     data = np.zeros((PER_PIXEL * len(rows), PER_PIXEL * len(rows[0]), 3), dtype=np.uint8)
 
-    fig = plt.figure(figsize=(12, 12))
+    fig = plt.figure(figsize=(25, 25))
     images = []
 
     blocked = set()
@@ -77,7 +80,9 @@ def parse(test, stderr, dst_path):
         if step % 1000 == 0 or step == len(log) - 1:
             print(f'Done {step + 1} steps of {len(log)}')
 
-    writer = FasterFFMpegWriter(fps=15, bitrate=1800)
+    print('Creating animation (can take a while)...')
+
+    writer = FasterFFMpegWriter()
     ani = animation.ArtistAnimation(fig, images, interval=interval, blit=True, repeat=False)
     ani.save(dst_path, writer=writer)
 

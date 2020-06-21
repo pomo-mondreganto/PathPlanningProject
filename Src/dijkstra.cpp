@@ -37,7 +37,7 @@ Dijkstra::startSearch() {
 
         std::list<std::pair<int, int>> adj = generateAdjacent(cur->i, cur->j);
 
-        for (auto &n: adj) {
+        for (auto &n : adj) {
             std::shared_ptr<Node> new_node = createNode(cur, n.first, n.second, 0, 0);
             new_node->parent = cur;
         }

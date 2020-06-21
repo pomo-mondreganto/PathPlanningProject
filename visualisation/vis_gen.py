@@ -2,6 +2,7 @@
 
 import argparse
 import subprocess
+from collections import defaultdict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -21,6 +22,8 @@ EXEC_PATH = BASE_DIR / 'Bin' / 'Debug' / 'PathPlanning'
 
 PER_PIXEL = 1
 
+ALGORITHMS = ['dijkstra', 'astar', 'jp_search']
+
 
 def set_pixel(blocked, data, i, j, pix, sz=PER_PIXEL):
     if (i, j) in blocked:
@@ -31,7 +34,7 @@ def set_pixel(blocked, data, i, j, pix, sz=PER_PIXEL):
             coord[di, dj] = pix
 
 
-def parse(test, stderr, dst_path, gen_image=False):
+def parse_map(test, stderr, dst_path, gen_image=False):
     rows = list(map(lambda x: list(map(int, x.text.split(' '))),
                     test.find('map').find('grid').findall('row')))
     data = np.zeros((PER_PIXEL * len(rows), PER_PIXEL * len(rows[0]), 3), dtype=np.uint8)
@@ -93,8 +96,22 @@ def parse(test, stderr, dst_path, gen_image=False):
         ani.save(dst_path, writer=writer)
 
 
-def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze,
-             gen_image=False):
+def parse_stats(stdout):
+    keys = {
+        'numberofsteps': 'steps',
+        'nodescreated': 'memory',
+        'time': 'time',
+    }
+    results = {}
+    for line in stdout.split('\n'):
+        for k in keys.keys():
+            if k in line:
+                val = float(line.split('=')[1])
+                results[keys[k]] = val
+    return results
+
+
+def run_program(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze):
     with NamedTemporaryFile(suffix='.xml', delete=False) as tmp_f:
         algo_el = root.find('algorithm')
         algo_el.find('searchtype').text = algorithm
@@ -115,6 +132,14 @@ def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, 
         )
         out, err = p.communicate()
 
+    return out, err
+
+
+def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, allow_squeeze,
+             gen_image=False):
+    _, err = run_program(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners,
+                         allow_squeeze)
+
     fname = f'ani_{algorithm}_{metric}_{bt}'
     if allow_diagonal:
         fname += '_allowdiagonal'
@@ -133,7 +158,7 @@ def generate(root, algorithm, metric, hweight, bt, allow_diagonal, cut_corners, 
     dst_path = (Path(__file__).resolve().parent / res_dir / fname)
     dst_path = dst_path.with_suffix(suffix)
 
-    parse(root, err.decode(), dst_path, gen_image)
+    parse_map(root, err.decode(), dst_path, gen_image)
     print('Done', dst_path)
 
 
@@ -143,7 +168,7 @@ def run_all(args):
     root = etree.fromstring(test_data)
     root.find('options').find('loglevel').text = '1.5'
 
-    for algorithm in ['astar', 'dijkstra', 'jp_search']:
+    for algorithm in ALGORITHMS:
         if algorithm == 'dijkstra':
             # dijkstra doesn't use metrics or breaking ties
             metrics = ['diagonal']
@@ -188,6 +213,57 @@ def run_image(args):
              allow_squeeze=args.allowsqueeze)
 
 
+def run_performance(args):
+    test_path = (Path().cwd() / args.file).resolve()
+    test_data = test_path.read_text()
+    root = etree.fromstring(test_data)
+    root.find('options').find('loglevel').text = '1'
+
+    results = {}
+    for algorithm in ALGORITHMS:
+        out, _ = run_program(root, algorithm=algorithm, metric=args.metric, hweight=args.hweight,
+                             bt=args.breakingties, allow_diagonal=args.allowdiagonal,
+                             cut_corners=args.cutcorners,
+                             allow_squeeze=args.allowsqueeze)
+        results[algorithm] = parse_stats(out.decode())
+
+    labels = list(results[ALGORITHMS[0]].keys())
+
+    label_values = [[] for _ in labels]
+
+    recoded = defaultdict(list)
+    for algo in ALGORITHMS:
+        for i, label in enumerate(labels):
+            val = results[algo][label]
+            label_values[i].append(val)
+            recoded[algo].append(val)
+
+    for k, data in recoded.items():
+        for i, val in enumerate(data):
+            recoded[k][i] /= max(label_values[i])
+
+    print(recoded)
+
+    x = np.arange(len(labels))
+    fig, ax = plt.subplots()
+    width = 0.7 / len(labels)
+
+    rects = []
+
+    for i, (name, val) in enumerate(recoded.items()):
+        rects.append(ax.bar(x - 0.35 + width / 2 + width * i, val, width, label=ALGORITHMS[i]))
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.get_yaxis().set_visible(False)
+    ax.legend()
+
+    plt.savefig('foo.png')
+
+    # rects1 =
+    # rects2 = ax.bar(x + width / 2, women_means, width, label='Women')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create visualisation for a test')
     parser.add_argument('--file', type=str, metavar='PATH', help='Path to test file', required=True)
@@ -215,6 +291,22 @@ if __name__ == '__main__':
     custom_parser.add_argument('--allowsqueeze', type=int, help='Allow squeezing (0/1)',
                                default='1')
     custom_parser.add_argument('--image', action='store_true', help='Generate the final image only')
+
+    perf_parser = subparsers.add_parser('perf', help='Generate algo performance comparison')
+    perf_parser.set_defaults(func=run_performance)
+
+    perf_parser.add_argument('--metric', type=str, help='Heuristic metric to use',
+                             default='manhattan')
+    perf_parser.add_argument('--hweight', type=float, help='Heuristic weight to use',
+                             default=1.0)
+    perf_parser.add_argument('--breakingties', type=str, help='Tie-breaking strategy',
+                             default='g-min')
+    perf_parser.add_argument('--allowdiagonal', type=int, help='Allow diagonal moves (0/1)',
+                             default='1')
+    perf_parser.add_argument('--cutcorners', type=int, help='Allow cutting corners (0/1)',
+                             default='1')
+    perf_parser.add_argument('--allowsqueeze', type=int, help='Allow squeezing (0/1)',
+                             default='1')
 
     parsed = parser.parse_args()
     parsed.func(parsed)

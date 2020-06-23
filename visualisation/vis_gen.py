@@ -35,7 +35,7 @@ def set_pixel(blocked, data, i, j, pix, sz=PER_PIXEL):
 
 
 def parse_map(test, stderr, dst_path, gen_image=False):
-    rows = list(map(lambda x: list(map(int, x.text.split(' '))),
+    rows = list(map(lambda x: list(map(int, x.text.strip().split(' '))),
                     test.find('map').find('grid').findall('row')))
     data = np.zeros((PER_PIXEL * len(rows), PER_PIXEL * len(rows[0]), 3), dtype=np.uint8)
 

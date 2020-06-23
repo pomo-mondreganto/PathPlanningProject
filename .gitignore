@@ -1,8 +1,10 @@
 .idea
+.vscode
 Bin/
 Build/
 Tests/CMakeFiles
 *_log.xml
 animations_temp
+images_temp
 Testing
 cmake-build-debug
